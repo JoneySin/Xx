@@ -21,7 +21,8 @@
 body{font-family:"Bricolage Grotesque",system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased}
 a,button,input,select{font:inherit;color:inherit}
 :focus-visible{outline:3px solid var(--acc);outline-offset:3px}
-.wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+.wrap{max-width:1360px;margin:0 auto;padding:0 32px}
+html{overflow-x:hidden}
 header{display:flex;align-items:center;justify-content:space-between;padding:20px 0}
 .logo{font-weight:800;font-size:1.35rem;letter-spacing:-.02em;display:flex;align-items:center;gap:10px}
 .logo i{width:30px;height:30px;border-radius:9px 9px 9px 2px;background:var(--acc);display:inline-block}
@@ -75,7 +76,9 @@ body,.tile,.trust div,dialog,.badge,.lang,.search,li,.opt input,.opt select{tran
 .bg i:nth-child(1){background:#7C9BFF;top:-15vmax;left:-10vmax}
 .bg i:nth-child(2){background:#FFB4A2;right:-15vmax;top:10vmax;animation-delay:-8s}
 .bg i:nth-child(3){background:#A8E6E0;bottom:-20vmax;left:25vw;animation-delay:-15s}
-header{position:sticky;top:0;z-index:5;margin:0 -20px;padding:14px 20px;backdrop-filter:blur(16px);background:color-mix(in srgb,var(--bg) 65%,transparent)}
+header{position:sticky;top:0;z-index:5;margin:0 -32px;padding:14px 32px}
+header::before{content:"";position:absolute;z-index:-1;top:0;bottom:0;left:50%;width:100vw;transform:translateX(-50%);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);background:color-mix(in srgb,var(--bg) 65%,transparent);border-bottom:1px solid color-mix(in srgb,var(--line) 60%,transparent)}
+@media(max-width:700px){.wrap{padding:0 20px}header{margin:0 -20px;padding:14px 20px}}
 .hero{display:flex;align-items:center;justify-content:space-between;gap:30px;max-width:none}
 .hero>div:first-child{max-width:700px}
 .hero>div:first-child>*{animation:up .9s backwards cubic-bezier(.2,.8,.2,1)}
@@ -117,7 +120,7 @@ li{animation:up .35s backwards}
 .drop svg{display:block;margin:0 auto 10px;width:42px;height:42px;stroke:var(--acc);animation:bob 2.4s ease-in-out infinite}
 .go{background:linear-gradient(120deg,var(--acc),color-mix(in srgb,var(--acc) 40%,#c084fc))}
 .glow{position:fixed;left:50%;top:30%;width:560px;height:560px;margin:-280px 0 0 -280px;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--acc) 26%,transparent),transparent 65%);pointer-events:none;z-index:0;transition:left .3s,top .3s}
-.marq{overflow:hidden;margin:0 -20px 30px;-webkit-mask-image:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent);mask-image:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent)}
+.marq{overflow:hidden;margin:0 calc(50% - 50vw) 30px;-webkit-mask-image:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent);mask-image:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent)}
 .marq div{display:flex;gap:12px;width:max-content;animation:mq 30s linear infinite}
 .marq span{border:1px solid var(--line);background:var(--card);border-radius:99px;padding:8px 20px;font-weight:600;font-size:.9rem;color:var(--mut)}
 header{flex-wrap:nowrap}
@@ -136,6 +139,13 @@ li{padding:8px 12px 8px 8px}
 .th{height:68px;max-width:84px;border-radius:10px;flex:none;background:var(--line);border:1px solid var(--line)}
 img.th{width:68px;object-fit:cover}
 canvas.th{background:#fff}
+[hidden]{display:none!important}
+.out{margin-top:16px;animation:pop .4s cubic-bezier(.2,1.2,.3,1)}
+.big{font-size:1.55rem;font-weight:800;letter-spacing:-.02em;background:var(--bg);border-radius:16px;padding:16px 18px;line-height:1.25}
+.row{display:flex;justify-content:space-between;gap:14px;padding:11px 4px;border-bottom:1px solid var(--line);font-size:.95rem}
+.row span{color:var(--mut)}.row b{text-align:right}
+.bar{height:10px;border-radius:9px;background:#F6C9E6;overflow:hidden;margin:14px 0 4px}
+.bar i{display:block;height:100%;background:var(--acc);border-radius:9px}
 @keyframes shine{to{background-position:-300% 0}}
 @keyframes bob{50%{transform:translateY(-6px)}}
 @keyframes mq{to{transform:translateX(-50%)}}
@@ -215,6 +225,13 @@ const TOOLS = [
   { id:"protect", n:"Protect PDF", d:"Lock a PDF with a password. Needs an internet connection the first time.", c:"#FFD0D0", acc:".pdf", opt:"prot", out:"protected.pdf" },
   { id:"addlink", n:"Add Link to PDF", d:"Add a clickable web link, as text or over a whole page.", c:"#BFE3FF", acc:".pdf", opt:"al", out:"linked.pdf" },
   { id:"rmlink", n:"Remove Links", d:"Strip every clickable link from a PDF.", c:"#FFD8C0", acc:".pdf", out:"no-links.pdf" },
+  { id:"dark", n:"PDF Dark Mode", d:"Turn white pages into easy-on-the-eyes dark pages. Text becomes an image.", c:"#AEB8E0", acc:".pdf", opt:"dk", out:"dark.pdf" },
+  { id:"age", n:"Age Calculator", d:"Exact age in years, months and days, plus your next birthday.", c:"#FFD9C2", calc:true, opt:"ag" },
+  { id:"percent", n:"Percentage Calculator", d:"Percent of, percent change, increase and decrease.", c:"#CDEBC0", calc:true, opt:"pc" },
+  { id:"unit", n:"Unit Converter", d:"Length, weight, temperature, area, volume, speed, data and time.", c:"#BFE3FF", calc:true, opt:"un" },
+  { id:"gst", n:"GST Calculator", d:"Add or remove GST at any rate, with the CGST and SGST split.", c:"#FFE7A0", calc:true, opt:"gs" },
+  { id:"emi", n:"EMI Calculator", d:"Monthly EMI, total interest and total payment for any loan.", c:"#F6C9E6", calc:true, opt:"em" },
+  { id:"datediff", n:"Date Difference", d:"Days, weeks, months and working days between two dates.", c:"#C9D5FF", calc:true, opt:"dd" },
   { id:"splitall", n:"Split to Pages", d:"Save every page as its own PDF, bundled in one ZIP.", c:"#C2E9FB", acc:".pdf", out:"pages.zip" },
   { id:"croppdf", n:"Crop PDF", d:"Trim margins from every page.", c:"#F9DDA4", acc:".pdf", opt:"crop", out:"cropped.pdf" },
   { id:"pdfinfo", n:"Edit PDF Info", d:"Set title, author and subject, or leave blank to clear them.", c:"#D8D0FF", acc:".pdf", opt:"info", out:"edited.pdf" },
@@ -246,6 +263,13 @@ P.pdfinfo = '<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/>';
 P.protect = '<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4M12 15v2"/>';
 P.addlink = '<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>';
 P.rmlink = '<path d="M9 15l-1 1a4 4 0 0 1-5.7-5.7l3-3M15 9l1-1a4 4 0 0 1 5.7 5.7l-3 3M3 3l18 18"/>';
+P.dark = '<path d="M21 13A9 9 0 1 1 11 3a7 7 0 0 0 10 10z"/>';
+P.age = '<rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4M16 3v4M3 11h18"/>';
+P.datediff = '<rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4M16 3v4M3 11h18M8 16h8"/>';
+P.percent = '<path d="M19 5L5 19"/><circle cx="7" cy="7" r="2.5"/><circle cx="17" cy="17" r="2.5"/>';
+P.unit = '<rect x="2" y="8" width="20" height="8" rx="2"/><path d="M6 8v4M10 8v3M14 8v4M18 8v3"/>';
+P.gst = '<path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/>';
+P.emi = '<circle cx="12" cy="12" r="9"/><path d="M9 8h6M9 12h6M9 8c4 0 4 5 0 5l5 3"/>';
 P.reverse = '<path d="M7 4v16M3 16l4 4 4-4M17 20V4M13 8l4-4 4 4"/>';
 P.gray = '<circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/>';
 P.a4 = '<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/>';
@@ -274,6 +298,13 @@ const OPTS = () => ({
   ps: fld("o1", "Photo width in cm", "3.5", "number") + fld("o2", "Photo height in cm", "4.5", "number") + fld("o3", "Gap in mm", "2", "number"),
   prot: fld("o1", "Password to open the PDF", "", "password") + fld("o2", "Owner password for editing (optional)", "", "password") + sel("o3", "Printing", [["1", "Allowed"], ["0", "Not allowed"]]),
   al: fld("o1", "Link address", "https://example.com") + fld("o2", "Pages (or type all)", "all") + sel("o3", "Where", [["bl", "Text, bottom left"], ["bc", "Text, bottom centre"], ["br", "Text, bottom right"], ["page", "Whole page (invisible)"]]) + fld("o4", "Link text (optional)", "Visit our website"),
+  dk: sel("o1", "Style", [["invert(1) hue-rotate(180deg)", "Dark, keep colours"], ["invert(1)", "Pure invert"], ["invert(1) hue-rotate(180deg) brightness(.85) contrast(.95)", "Soft dark"]]),
+  ag: fld("o1", "Date of birth", "", "date") + fld("o2", "Age on this date (blank = today)", "", "date"),
+  pc: sel("o1", "Calculation", [["of", "X% of Y"], ["is", "X is what % of Y"], ["chg", "% change from X to Y"], ["inc", "Increase X by Y%"], ["dec", "Decrease X by Y%"]]) + fld("o2", "X", "20", "number") + fld("o3", "Y", "500", "number"),
+  un: sel("o1", "Type", [...Object.keys(UNITS), "Temperature"].map(x => [x, x])) + fld("o2", "Value", "1", "number") + '<label for="o3">From</label><select id="o3"></select><label for="o4">To</label><select id="o4"></select>',
+  gs: fld("o1", "Amount in ₹", "1000", "number") + sel("o2", "GST rate", [[0, "0%"], [0.25, "0.25%"], [3, "3%"], [5, "5%"], [12, "12%"], [18, "18%"], [28, "28%"]]) + fld("o4", "Custom rate % (optional)", "", "number") + sel("o3", "Mode", [["add", "Add GST to amount"], ["rem", "Remove GST from amount"]]),
+  em: fld("o1", "Loan amount in ₹", "500000", "number") + fld("o2", "Interest rate per year (%)", "9", "number") + fld("o3", "Tenure", "5", "number") + sel("o4", "Tenure in", [["y", "Years"], ["m", "Months"]]),
+  dd: fld("o1", "From date", "", "date") + fld("o2", "To date", "", "date"),
   pw: fld("o1", b("PDF password", "PDF पासवर्ड"), "", "password")
 });
 let outName = "";
@@ -291,8 +322,8 @@ function openTool(id) {
   tool = TOOLS.find(t => t.id === id); files = [];
   $("dt").textContent = nm(tool); $("dd").textContent = ds(tool); $("di").innerHTML = ico(tool.id); $("di").style.background = tool.c;
   $("inp").accept = tool.acc; $("inp").multiple = !!tool.multi;
-  $("opt").innerHTML = OPTS()[tool.opt] || "";
-  reset(); render(); $("dlg").showModal();
+  $("opt").innerHTML = OPTS()[tool.opt] || ""; if (tool.id === "unit") fillUnits();
+  reset(); render(); $("drop").hidden = $("list").hidden = !!tool.calc; if (tool.calc) $("go").textContent = "Calculate"; $("dlg").showModal();
 }
 function reset() { outName = ""; $("msg").textContent = ""; $("msg").className = "msg"; $("res").innerHTML = ""; if (url) URL.revokeObjectURL(url); }
 
@@ -328,7 +359,7 @@ function render() {
     `<li>${thumb(f)}<span>${f.name.replace(/[<&]/g, "")}</span><small>${size(f.size)}</small>` +
     (tool.multi && files.length > 1 ? `<button data-a="up" data-i="${i}" aria-label="Move up">↑</button>` : "") +
     `<button data-a="rm" data-i="${i}" aria-label="Remove">✕</button></li>`).join("");
-  $("go").disabled = files.length < (tool.min || 1);
+  $("go").disabled = !tool.calc && files.length < (tool.min || 1);
   thumbs();
   $("go").textContent = b(nm(tool).replace(/ PDF| &.*/, "") + " now", "शुरू करें");
 }
@@ -367,7 +398,79 @@ async function renderPages(file, scale, cb, pw) {
   }
 }
 
+const fmt = (n, d = 2) => n.toLocaleString("en-IN", { maximumFractionDigits: d });
+const big = t => `<div class="big">${t}</div>`;
+const rows = a => a.map(([k, v]) => `<div class="row"><span>${k}</span><b>${v}</b></div>`).join("");
+const pd = v => { if (!v) return null; const [y, m, d] = v.split("-").map(Number); return new Date(y, m - 1, d); };
+const today = () => { const t = new Date(); return new Date(t.getFullYear(), t.getMonth(), t.getDate()); };
+function ymd(a, b) { let y = b.getFullYear() - a.getFullYear(), m = b.getMonth() - a.getMonth(), d = b.getDate() - a.getDate(); if (d < 0) { m--; d += new Date(b.getFullYear(), b.getMonth(), 0).getDate(); } if (m < 0) { y--; m += 12; } return [y, m, d]; }
+const UNITS = {
+  Length: { metre: 1, kilometre: 1000, centimetre: .01, millimetre: .001, mile: 1609.344, yard: .9144, foot: .3048, inch: .0254 },
+  Weight: { kilogram: 1, gram: .001, milligram: 1e-6, tonne: 1000, quintal: 100, pound: .45359237, ounce: .0283495231 },
+  Area: { "sq metre": 1, "sq km": 1e6, "sq foot": .09290304, "sq yard": .83612736, acre: 4046.8564224, hectare: 1e4 },
+  Volume: { litre: 1, millilitre: .001, "cubic metre": 1000, "US gallon": 3.785411784, "US cup": .2365882365 },
+  Speed: { "m/s": 1, "km/h": 1 / 3.6, mph: .44704, knot: .514444 },
+  Data: { byte: 1, KB: 1024, MB: 1048576, GB: 1073741824, TB: 1099511627776 },
+  Time: { second: 1, minute: 60, hour: 3600, day: 86400, week: 604800, "year (365 d)": 31536000 }
+};
+function fillUnits() {
+  const c = $("o1").value, us = c === "Temperature" ? ["Celsius", "Fahrenheit", "Kelvin"] : Object.keys(UNITS[c]), o = us.map(u => `<option>${u}</option>`).join("");
+  $("o3").innerHTML = o; $("o4").innerHTML = o; $("o4").selectedIndex = 1;
+}
 const RUN = {
+  age() {
+    const dob = pd($("o1").value), on = pd($("o2").value) || today();
+    if (!dob) throw new Error("Pick your date of birth.");
+    if (dob > on) throw new Error("Date of birth must be before the second date.");
+    const [y, m, d] = ymd(dob, on), days = Math.round((on - dob) / 864e5);
+    let nb = new Date(on.getFullYear(), dob.getMonth(), dob.getDate()); if (nb < on) nb = new Date(on.getFullYear() + 1, dob.getMonth(), dob.getDate());
+    return big(`${y} years, ${m} months, ${d} days`) + rows([["Total months", fmt(y * 12 + m)], ["Total weeks", fmt(Math.floor(days / 7))], ["Total days", fmt(days)], ["Next birthday in", Math.round((nb - on) / 864e5) + " days"]]);
+  },
+  percent() {
+    const m = $("o1").value, x = parseFloat($("o2").value), y = parseFloat($("o3").value);
+    if (isNaN(x) || isNaN(y)) throw new Error("Enter both numbers.");
+    const r = { of: x / 100 * y, is: x / y * 100, chg: (y - x) / Math.abs(x) * 100, inc: x * (1 + y / 100), dec: x * (1 - y / 100) }[m];
+    if (!isFinite(r)) throw new Error("This calculation divides by zero.");
+    return big(fmt(r, 4) + (m === "is" || m === "chg" ? "%" : ""));
+  },
+  unit() {
+    const c = $("o1").value, v = parseFloat($("o2").value), f = $("o3").value, t = $("o4").value;
+    if (isNaN(v)) throw new Error("Enter a value to convert.");
+    let r;
+    if (c === "Temperature") { const k = f === "Celsius" ? v : f === "Fahrenheit" ? (v - 32) * 5 / 9 : v - 273.15; r = t === "Celsius" ? k : t === "Fahrenheit" ? k * 9 / 5 + 32 : k + 273.15; }
+    else r = v * UNITS[c][f] / UNITS[c][t];
+    return big(`${fmt(v, 6)} ${f} = ${fmt(r, 6)} ${t}`);
+  },
+  gst() {
+    const a = parseFloat($("o1").value), r = $("o4").value ? parseFloat($("o4").value) : +$("o2").value, add = $("o3").value === "add";
+    if (isNaN(a) || isNaN(r)) throw new Error("Enter the amount and a valid rate.");
+    const net = add ? a : a / (1 + r / 100), g = add ? a * r / 100 : a - net, tot = net + g;
+    return big("₹ " + fmt(tot)) + rows([["Amount without GST", "₹ " + fmt(net)], ["GST at " + r + "%", "₹ " + fmt(g)], ["CGST + SGST", "₹ " + fmt(g / 2) + " + ₹ " + fmt(g / 2)], ["Total with GST", "₹ " + fmt(tot)]]);
+  },
+  emi() {
+    const P = parseFloat($("o1").value), ar = parseFloat($("o2").value), t = parseFloat($("o3").value), n = $("o4").value === "y" ? Math.round(t * 12) : Math.round(t);
+    if (!(P > 0) || isNaN(ar) || !(n > 0)) throw new Error("Enter loan amount, interest rate and tenure.");
+    const r = ar / 1200, e = r ? P * r * Math.pow(1 + r, n) / (Math.pow(1 + r, n) - 1) : P / n, tot = e * n;
+    return big("₹ " + fmt(e) + " / month") + `<div class="bar"><i style="width:${(P / tot * 100).toFixed(1)}%"></i></div>` + rows([["Principal", "₹ " + fmt(P)], ["Total interest", "₹ " + fmt(tot - P)], ["Total payment", "₹ " + fmt(tot)], ["Number of EMIs", n]]);
+  },
+  datediff() {
+    let a = pd($("o1").value), b = pd($("o2").value);
+    if (!a || !b) throw new Error("Pick both dates.");
+    if (a > b) [a, b] = [b, a];
+    const [y, m, d] = ymd(a, b), days = Math.round((b - a) / 864e5);
+    let wd = 0; for (let i = 0; i <= days; i++) { const w = new Date(a.getFullYear(), a.getMonth(), a.getDate() + i).getDay(); if (w && w < 6) wd++; }
+    return big(`${y} years, ${m} months, ${d} days`) + rows([["Total days", fmt(days)], ["Total weeks", fmt(Math.floor(days / 7)) + " weeks " + days % 7 + " days"], ["Working days (Mon to Fri)", fmt(wd)]]);
+  },
+  async dark() {
+    const out = await PDFDocument.create(), flt = $("o1").value;
+    await renderPages(files[0], 1.8, async (c, n, vp) => {
+      const g = document.createElement("canvas"); g.width = c.width; g.height = c.height;
+      const x = g.getContext("2d"); x.filter = flt; x.drawImage(c, 0, 0);
+      const img = await out.embedJpg(await (await toBlob(g, .9)).arrayBuffer());
+      out.addPage([vp.width, vp.height]).drawImage(img, { x: 0, y: 0, width: vp.width, height: vp.height });
+    });
+    return new Blob([await out.save()], { type: "application/pdf" });
+  },
   async merge() {
     const out = await PDFDocument.create();
     for (const f of files) {
@@ -642,6 +745,7 @@ $("go").onclick = async () => {
   reset(); $("go").disabled = true; $("go").classList.add("busy"); say(b("Working…", "प्रोसेस हो रहा है…"));
   try {
     const blob = await RUN[tool.id]();
+    if (tool.calc) { say(""); $("res").innerHTML = `<div class="out">${blob}</div>`; $("go").classList.remove("busy"); $("go").disabled = false; return; }
     url = URL.createObjectURL(blob);
     const fn = outName || tool.out;
     say(b("Done. ", "हो गया। ") + size(files.reduce((a, f) => a + f.size, 0)) + " → " + size(blob.size));
@@ -649,11 +753,12 @@ $("go").onclick = async () => {
   } catch (e) {
     say(e.name === "PasswordException" ? b("Password is missing or wrong.", "पासवर्ड गायब या गलत है।") : e.message && !/Failed to parse|Invalid PDF|encrypted/i.test(e.message) ? e.message : b("This file could not be read. It may be damaged or password-protected (try Unlock PDF).", "यह फाइल पढ़ी नहीं जा सकी। वह खराब या पासवर्ड वाली हो सकती है (PDF अनलॉक आज़माएं)।"), true);
   }
-  $("go").classList.remove("busy"); $("go").disabled = files.length < (tool.min || 1);
+  $("go").classList.remove("busy"); $("go").disabled = !tool.calc && files.length < (tool.min || 1);
 };
 $("drop").innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></svg><b>Choose files</b>or drag and drop them here';
 $("q").oninput = renderGrid;
-const CHIPS = [["Merge PDF","merge"],["PDF to JPG","pdf2jpg"],["Compress","compress"],["Crop image","imgstudio"],["Split","split"],["PNG / WebP","imgstudio"],["Watermark","watermark"],["DPI changer","imgstudio"],["Unlock","unlock"],["PDF to text","pdf2txt"],["Split to ZIP","splitall"],["Page numbers","pagenum"],["Rotate","rotate"],["Crop PDF","croppdf"],["Resize image","imgstudio"],["PDF info","pdfinfo"],["Protect PDF","protect"],["Add link","addlink"],["Remove links","rmlink"],["Reverse pages","reverse"],["Passport photo sheet","photosheet"],["Join images","join"],["Watermark image","imgwm"],["Grayscale PDF","gray"],["A4 resize","a4"],["Image to Base64","base64"]];
+$("opt").onchange = e => { if (tool && tool.id === "unit" && e.target.id === "o1") fillUnits(); };
+const CHIPS = [["Merge PDF","merge"],["PDF to JPG","pdf2jpg"],["Compress","compress"],["Crop image","imgstudio"],["Split","split"],["PNG / WebP","imgstudio"],["Watermark","watermark"],["DPI changer","imgstudio"],["Unlock","unlock"],["PDF to text","pdf2txt"],["Split to ZIP","splitall"],["Page numbers","pagenum"],["Rotate","rotate"],["Crop PDF","croppdf"],["Resize image","imgstudio"],["PDF info","pdfinfo"],["Protect PDF","protect"],["Add link","addlink"],["Remove links","rmlink"],["Age calculator","age"],["EMI calculator","emi"],["GST calculator","gst"],["Percentage","percent"],["Unit converter","unit"],["Date difference","datediff"],["PDF dark mode","dark"],["Reverse pages","reverse"],["Passport photo sheet","photosheet"],["Join images","join"],["Watermark image","imgwm"],["Grayscale PDF","gray"],["A4 resize","a4"],["Image to Base64","base64"]];
 const chipHtml = CHIPS.map(c => `<button class="chip" data-id="${c[1]}">${c[0]}</button>`).join("");
 $("mq").innerHTML = chipHtml + chipHtml;
 $("mq").onclick = e => { const c = e.target.closest(".chip"); if (c) openTool(c.dataset.id); };
