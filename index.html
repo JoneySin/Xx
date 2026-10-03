@@ -146,6 +146,11 @@ canvas.th{background:#fff}
 .row span{color:var(--mut)}.row b{text-align:right;word-break:break-all}
 .bar{height:10px;border-radius:9px;background:#F6C9E6;overflow:hidden;margin:14px 0 4px}
 .bar i{display:block;height:100%;background:var(--acc);border-radius:9px}
+.sws{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}
+.sw{height:68px;border-radius:14px;border:1px solid var(--line);font-weight:700;font-size:.8rem;cursor:pointer;transition:transform .2s}
+.sw:hover{transform:scale(1.06)}
+input[type=color]{height:48px;padding:4px;cursor:pointer}
+@media(max-width:520px){.sws{grid-template-columns:repeat(2,1fr)}}
 @keyframes shine{to{background-position:-300% 0}}
 @keyframes bob{50%{transform:translateY(-6px)}}
 @keyframes mq{to{transform:translateX(-50%)}}
@@ -232,6 +237,13 @@ const TOOLS = [
   { id:"gst", n:"GST Calculator", d:"Add or remove GST at any rate, with the CGST and SGST split.", c:"#FFE7A0", calc:true, opt:"gs" },
   { id:"emi", n:"EMI Calculator", d:"Monthly EMI, total interest and total payment for any loan.", c:"#F6C9E6", calc:true, opt:"em" },
   { id:"datediff", n:"Date Difference", d:"Days, weeks, months and working days between two dates.", c:"#C9D5FF", calc:true, opt:"dd" },
+  { id:"bgremove", n:"Remove Background", d:"AI cutout inside your browser. Keep it transparent or fill white, blue or red. Needs internet the first time (large model).", c:"#C7F0D8", acc:"image/*", multi:true, opt:"bg", out:"image" },
+  { id:"social", n:"Social Media Resize", d:"Exact sizes for Instagram, Facebook, YouTube, LinkedIn, X and WhatsApp.", c:"#FFD6E7", acc:"image/*", multi:true, opt:"sm", out:"image" },
+  { id:"enlarge", n:"Image Enlarger / Scale", d:"Enlarge or shrink by percent with smooth, high-quality steps.", c:"#CFE3FF", acc:"image/*", multi:true, opt:"en", out:"image" },
+  { id:"meme", n:"Meme Generator", d:"Add classic top and bottom text to any picture.", c:"#FFEAA0", acc:"image/*", opt:"mm", out:"meme.jpg" },
+  { id:"collage", n:"Collage Maker", d:"Arrange several photos in a neat grid.", c:"#E0D0FF", acc:"image/*", multi:true, min:2, opt:"cl", out:"collage.jpg" },
+  { id:"heic", n:"HEIC to JPG", d:"Convert iPhone HEIC photos to JPG. Needs internet the first time.", c:"#CDEFE9", acc:".heic,.heif", multi:true, out:"image" },
+  { id:"palette", n:"Colour Palette", d:"Find the main colours in a picture, with copyable hex codes.", c:"#FFD3B5", acc:"image/*", info:true },
   { id:"ocr", n:"OCR: Image or PDF to Text", d:"Read text from photos and scanned PDFs, including Hindi. Needs internet the first time.", c:"#FFE0B5", acc:"image/*,.pdf", multi:true, opt:"oc", out:"ocr-text.txt" },
   { id:"wordcount", n:"PDF Word Count", d:"Count words, characters, pages and reading time.", c:"#CFE8D5", acc:".pdf", info:true },
   { id:"nup", n:"N-up: Pages per Sheet", d:"Put 2, 4 or 6 pages on one sheet to save paper.", c:"#D9D2F5", acc:".pdf", opt:"nu", out:"n-up.pdf" },
@@ -276,6 +288,13 @@ P.percent = '<path d="M19 5L5 19"/><circle cx="7" cy="7" r="2.5"/><circle cx="17
 P.unit = '<rect x="2" y="8" width="20" height="8" rx="2"/><path d="M6 8v4M10 8v3M14 8v4M18 8v3"/>';
 P.gst = '<path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/>';
 P.emi = '<circle cx="12" cy="12" r="9"/><path d="M9 8h6M9 12h6M9 8c4 0 4 5 0 5l5 3"/>';
+P.bgremove = '<path d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" stroke-dasharray="3 3"/><circle cx="12" cy="10" r="3"/><path d="M6 19c1-3 3-4 6-4s5 1 6 4"/>';
+P.social = '<rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".6"/>';
+P.enlarge = '<path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>';
+P.meme = '<rect x="3" y="3" width="18" height="18" rx="3"/><path d="M7 8h10M8 16h8"/>';
+P.collage = '<rect x="3" y="3" width="8" height="11" rx="2"/><rect x="13" y="3" width="8" height="6" rx="2"/><rect x="13" y="11" width="8" height="10" rx="2"/><rect x="3" y="16" width="8" height="5" rx="2"/>';
+P.heic = '<rect x="3" y="3" width="18" height="18" rx="4"/><path d="M8 15l3-4 2 3 2-2 3 3"/>';
+P.palette = '<circle cx="13.5" cy="6.5" r="1.5"/><circle cx="17.5" cy="10.5" r="1.5"/><circle cx="8.5" cy="7.5" r="1.5"/><circle cx="6.5" cy="12.5" r="1.5"/><path d="M12 3a9 9 0 1 0 0 18c1 0 2-.8 2-1.8 0-.5-.2-.9-.5-1.2-.3-.3-.5-.7-.5-1.2 0-1 .8-1.8 1.8-1.8H17a4 4 0 0 0 4-4c0-4.4-4-8-9-8z"/>';
 P.ocr = '<path d="M4 7V5a1 1 0 0 1 1-1h2M17 4h2a1 1 0 0 1 1 1v2M20 17v2a1 1 0 0 1-1 1h-2M7 20H5a1 1 0 0 1-1-1v-2M8 9h8M8 12h8M8 15h5"/>';
 P.wordcount = '<path d="M4 6h16M4 10h16M4 14h10M4 18h7"/>';
 P.nup = '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M12 4v16M3 12h18"/>';
@@ -317,6 +336,11 @@ const OPTS = () => ({
   gs: fld("o1", "Amount in ₹", "1000", "number") + sel("o2", "GST rate", [[0, "0%"], [0.25, "0.25%"], [3, "3%"], [5, "5%"], [12, "12%"], [18, "18%"], [28, "28%"]]) + fld("o4", "Custom rate % (optional)", "", "number") + sel("o3", "Mode", [["add", "Add GST to amount"], ["rem", "Remove GST from amount"]]),
   em: fld("o1", "Loan amount in ₹", "500000", "number") + fld("o2", "Interest rate per year (%)", "9", "number") + fld("o3", "Tenure", "5", "number") + sel("o4", "Tenure in", [["y", "Years"], ["m", "Months"]]),
   dd: fld("o1", "From date", "", "date") + fld("o2", "To date", "", "date"),
+  bg: sel("o1", "Background", [["", "Transparent (PNG)"], ["#ffffff", "White"], ["#2f6fdb", "Blue (passport style)"], ["#d9363e", "Red"]]),
+  sm: sel("o1", "Size", [["1080,1080", "Instagram post, 1080x1080"], ["1080,1350", "Instagram portrait, 1080x1350"], ["1080,1920", "Story or Reel, 1080x1920"], ["1200,630", "Facebook post, 1200x630"], ["820,312", "Facebook cover, 820x312"], ["1280,720", "YouTube thumbnail, 1280x720"], ["2560,1440", "YouTube channel art, 2560x1440"], ["1584,396", "LinkedIn banner, 1584x396"], ["1500,500", "X header, 1500x500"], ["500,500", "WhatsApp profile, 500x500"], ["413,531", "Passport photo 35x45 mm, 413x531"]]) + sel("o2", "Fit", [["fill", "Fill and crop the edges"], ["fit", "Fit whole picture, white borders"]]),
+  en: fld("o1", "Scale in % (200 doubles the size)", "200", "number") + sel("o2", "Format", [["jpeg", "JPG"], ["png", "PNG"]]),
+  mm: fld("o1", "Top text", "WHEN THE CODE WORKS") + fld("o2", "Bottom text", "AND YOU DON'T KNOW WHY"),
+  cl: sel("o1", "Columns", [[2, "2 columns"], [3, "3 columns"], [4, "4 columns"]]) + fld("o2", "Gap in px", "10", "number") + '<label for="o3">Background colour</label><input id="o3" type="color" value="#ffffff">',
   oc: sel("o1", "Language in the document", [["eng", "English"], ["hin", "Hindi"], ["hin+eng", "Hindi + English"]]),
   nu: sel("o1", "Pages per sheet", [["2,1,841.89,595.28", "2 per sheet"], ["2,2,595.28,841.89", "4 per sheet"], ["3,2,841.89,595.28", "6 per sheet"]]),
   hf: fld("o1", "Header text", "Company name") + fld("o2", "Footer text", "Page {n} of {total}"),
@@ -353,7 +377,7 @@ $("inp").onchange = e => { add([...e.target.files]); e.target.value = ""; };
 
 const isPdf = f => /\.pdf$/i.test(f.name) || f.type === "application/pdf";
 function add(list) {
-  const ok = list.filter(f => tool.acc === "*" || (tool.acc.includes("image/*") && f.type.startsWith("image/")) || (tool.acc.includes(".pdf") && isPdf(f)));
+  const ok = list.filter(f => tool.acc === "*" || (tool.acc.includes("image/*") && f.type.startsWith("image/")) || (tool.acc.includes(".pdf") && isPdf(f)) || (tool.acc.includes(".heic") && /\.(heic|heif)$/i.test(f.name)));
   if (ok.length < list.length) say(b("Some files were skipped (wrong file type).", "कुछ फाइलें छोड़ दी गईं (गलत फाइल टाइप)।"), true);
   files = tool.multi ? files.concat(ok) : ok.slice(0, 1);
   reset(); render();
@@ -433,6 +457,18 @@ const UNITS = {
 function fillUnits() {
   const c = $("o1").value, us = c === "Temperature" ? ["Celsius", "Fahrenheit", "Kelvin"] : Object.keys(UNITS[c]), o = us.map(u => `<option>${u}</option>`).join("");
   $("o3").innerHTML = o; $("o4").innerHTML = o; $("o4").selectedIndex = 1;
+}
+const cv = (w, h) => { const c = document.createElement("canvas"); c.width = w; c.height = h; return c; };
+const baseName = f => f.name.replace(/\.[^.]+$/, "");
+function cover(x, bm, dx, dy, dw, dh) {
+  const r = dw / dh; let sx = 0, sy = 0, sw = bm.width, sh = bm.height;
+  if (sw / sh > r) { const w = sh * r; sx = (sw - w) / 2; sw = w; } else { const h = sw / r; sy = (sh - h) / 2; sh = h; }
+  x.drawImage(bm, sx, sy, sw, sh, dx, dy, dw, dh);
+}
+function wrapLines(x, t, max) {
+  const out = []; let line = "";
+  for (const w of t.split(/\s+/)) { const tt = line ? line + " " + w : w; if (x.measureText(tt).width > max && line) { out.push(line); line = w; } else line = tt; }
+  if (line) out.push(line); return out;
 }
 const RUN = {
   age() {
@@ -590,6 +626,84 @@ const RUN = {
     }
     if (!n) throw new Error("No clickable links were found in this PDF.");
     return new Blob([await d.save()], { type: "application/pdf" });
+  },
+  async bgremove() {
+    let m; try { m = await import("https://cdn.jsdelivr.net/npm/@imgly/background-removal@1/+esm"); } catch (e) { throw new Error("Could not load the background remover. Check your internet connection and try again."); }
+    const rm = m.removeBackground || (m.default && m.default.removeBackground), col = $("o1").value, res = [];
+    if (!rm) throw new Error("The background remover could not start.");
+    for (const f of files) {
+      say("Removing background… the first run downloads the AI model, which can take a minute.");
+      const out = await rm(f, { progress: (key, cur, total) => say((String(key).includes("fetch") ? "Downloading the AI model… " : "Processing… ") + (total ? Math.round(cur / total * 100) + "%" : "")) });
+      let blob = out;
+      if (col) { const bm = await createImageBitmap(out), c = cv(bm.width, bm.height), x = c.getContext("2d"); x.fillStyle = col; x.fillRect(0, 0, c.width, c.height); x.drawImage(bm, 0, 0); blob = await toBlob(c, 1, "image/png"); }
+      res.push({ blob, name: baseName(f) + "-no-bg.png" });
+    }
+    return pack(res);
+  },
+  async social() {
+    const [W, H] = $("o1").value.split(",").map(Number), fit = $("o2").value === "fit", res = [];
+    for (const f of files) {
+      say(f.name + "…");
+      const bm = await createImageBitmap(f), c = cv(W, H), x = c.getContext("2d");
+      x.imageSmoothingQuality = "high"; x.fillStyle = "#fff"; x.fillRect(0, 0, W, H);
+      if (fit) { const k = Math.min(W / bm.width, H / bm.height), w = bm.width * k, h = bm.height * k; x.drawImage(bm, (W - w) / 2, (H - h) / 2, w, h); } else cover(x, bm, 0, 0, W, H);
+      res.push({ blob: await toBlob(c, .95), name: baseName(f) + `-${W}x${H}.jpg` });
+    }
+    return pack(res);
+  },
+  async enlarge() {
+    const ft = $("o2").value, res = [];
+    for (const f of files) {
+      say(f.name + "…");
+      const bm = await createImageBitmap(f), p = Math.min(Math.max(.1, (+$("o1").value || 100) / 100), Math.sqrt(8e7 / (bm.width * bm.height)));
+      let cur = bm, k = 1;
+      if (p < 1) { const c = cv(Math.round(bm.width * p), Math.round(bm.height * p)), x = c.getContext("2d"); x.imageSmoothingQuality = "high"; x.drawImage(bm, 0, 0, c.width, c.height); cur = c; }
+      else while (k < p - 1e-6) { const st = Math.min(1.5, p / k), c = cv(Math.round(cur.width * st), Math.round(cur.height * st)), x = c.getContext("2d"); x.imageSmoothingQuality = "high"; x.drawImage(cur, 0, 0, c.width, c.height); cur = c; k *= st; }
+      const fin = cv(cur.width, cur.height), fx = fin.getContext("2d");
+      if (ft === "jpeg") { fx.fillStyle = "#fff"; fx.fillRect(0, 0, fin.width, fin.height); }
+      fx.drawImage(cur, 0, 0);
+      res.push({ blob: await toBlob(fin, .95, "image/" + ft), name: baseName(f) + `-${Math.round(p * 100)}pct.` + (ft === "jpeg" ? "jpg" : "png") });
+    }
+    return pack(res);
+  },
+  async meme() {
+    const bm = await createImageBitmap(files[0]), c = cv(bm.width, bm.height), x = c.getContext("2d"), fs = Math.round(bm.width / 9);
+    x.drawImage(bm, 0, 0); x.font = `900 ${fs}px Impact, "Arial Black", sans-serif`; x.textAlign = "center"; x.textBaseline = "top"; x.fillStyle = "#fff"; x.strokeStyle = "#000"; x.lineWidth = fs / 7; x.lineJoin = "round";
+    const draw = (t, bottom) => {
+      t = t.trim().toUpperCase(); if (!t) return;
+      const ls = wrapLines(x, t, bm.width * .94), lh = fs * 1.1;
+      ls.forEach((l, i) => { const y = bottom ? bm.height - fs * .3 - (ls.length - i) * lh : fs * .25 + i * lh; x.strokeText(l, bm.width / 2, y); x.fillText(l, bm.width / 2, y); });
+    };
+    draw($("o1").value, false); draw($("o2").value, true);
+    outName = "meme.jpg"; return toBlob(c, .92);
+  },
+  async collage() {
+    const n = +$("o1").value, g = Math.max(0, +$("o2").value || 0), cell = 600, rows = Math.ceil(files.length / n);
+    const c = cv(n * cell + g * (n + 1), rows * cell + g * (rows + 1)), x = c.getContext("2d");
+    x.fillStyle = $("o3").value; x.fillRect(0, 0, c.width, c.height); x.imageSmoothingQuality = "high";
+    for (let i = 0; i < files.length; i++) { say(`${i + 1} / ${files.length}…`); cover(x, await createImageBitmap(files[i]), g + (i % n) * (cell + g), g + Math.floor(i / n) * (cell + g), cell, cell); }
+    outName = "collage.jpg"; return toBlob(c, .92);
+  },
+  async heic() {
+    if (!window.heic2any) await new Promise((ok, no) => { const sc = document.createElement("script"); sc.src = "https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"; sc.onload = ok; sc.onerror = () => no(new Error("Could not load the HEIC converter. Check your internet connection and try again.")); document.head.appendChild(sc); });
+    const res = [];
+    for (const f of files) { say(f.name + "…"); let r = await heic2any({ blob: f, toType: "image/jpeg", quality: .92 }); if (Array.isArray(r)) r = r[0]; res.push({ blob: r, name: baseName(f) + ".jpg" }); }
+    return pack(res);
+  },
+  async palette() {
+    const bm = await createImageBitmap(files[0]), c = cv(64, Math.max(1, Math.round(64 * bm.height / bm.width))), x = c.getContext("2d");
+    x.drawImage(bm, 0, 0, c.width, c.height);
+    const d = x.getImageData(0, 0, c.width, c.height).data, bins = {};
+    for (let i = 0; i < d.length; i += 4) { if (d[i + 3] < 128) continue; const k = (d[i] >> 5) + "," + (d[i + 1] >> 5) + "," + (d[i + 2] >> 5), b = bins[k] || (bins[k] = { n: 0, r: 0, g: 0, b: 0 }); b.n++; b.r += d[i]; b.g += d[i + 1]; b.b += d[i + 2]; }
+    const picks = [];
+    for (const b of Object.values(bins).sort((p, q) => q.n - p.n)) {
+      const col = [b.r / b.n, b.g / b.n, b.b / b.n].map(Math.round);
+      if (picks.every(p => Math.hypot(p[0] - col[0], p[1] - col[1], p[2] - col[2]) > 50)) picks.push(col);
+      if (picks.length === 8) break;
+    }
+    if (!picks.length) throw new Error("No colours were found in this image.");
+    const hex = p => "#" + p.map(v => v.toString(16).padStart(2, "0")).join("").toUpperCase();
+    return big("Dominant colours (tap to copy)") + '<div class="sws">' + picks.map(p => `<button class="sw" style="background:${hex(p)};color:${p[0] * .3 + p[1] * .59 + p[2] * .11 > 140 ? "#111" : "#fff"}" onclick="navigator.clipboard&&navigator.clipboard.writeText('${hex(p)}');this.textContent='Copied'">${hex(p)}</button>`).join("") + "</div>";
   },
   async ocr() {
     if (!window.Tesseract) await new Promise((ok, no) => { const sc = document.createElement("script"); sc.src = "https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"; sc.onload = ok; sc.onerror = () => no(new Error("Could not load the OCR engine. Check your internet connection and try again.")); document.head.appendChild(sc); });
@@ -847,7 +961,7 @@ $("go").onclick = async () => {
 $("drop").innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></svg><b>Choose files</b>or drag and drop them here';
 $("q").oninput = renderGrid;
 $("opt").onchange = e => { if (tool && tool.id === "unit" && e.target.id === "o1") fillUnits(); };
-const CHIPS = [["Merge PDF","merge"],["PDF to JPG","pdf2jpg"],["Compress","compress"],["Crop image","imgstudio"],["Split","split"],["PNG / WebP","imgstudio"],["Watermark","watermark"],["DPI changer","imgstudio"],["Unlock","unlock"],["PDF to text","pdf2txt"],["Split to ZIP","splitall"],["Page numbers","pagenum"],["Rotate","rotate"],["Crop PDF","croppdf"],["Resize image","imgstudio"],["PDF info","pdfinfo"],["Protect PDF","protect"],["Add link","addlink"],["Remove links","rmlink"],["Age calculator","age"],["EMI calculator","emi"],["GST calculator","gst"],["Percentage","percent"],["Unit converter","unit"],["Date difference","datediff"],["PDF dark mode","dark"],["OCR","ocr"],["Word count","wordcount"],["N-up","nup"],["Header and footer","headfoot"],["Remove annotations","rmannot"],["File fingerprint","hash"],["Reverse pages","reverse"],["Passport photo sheet","photosheet"],["Join images","join"],["Watermark image","imgwm"],["Grayscale PDF","gray"],["A4 resize","a4"],["Image to Base64","base64"]];
+const CHIPS = [["Merge PDF","merge"],["PDF to JPG","pdf2jpg"],["Compress","compress"],["Crop image","imgstudio"],["Split","split"],["PNG / WebP","imgstudio"],["Watermark","watermark"],["DPI changer","imgstudio"],["Unlock","unlock"],["PDF to text","pdf2txt"],["Split to ZIP","splitall"],["Page numbers","pagenum"],["Rotate","rotate"],["Crop PDF","croppdf"],["Resize image","imgstudio"],["PDF info","pdfinfo"],["Protect PDF","protect"],["Add link","addlink"],["Remove links","rmlink"],["Age calculator","age"],["EMI calculator","emi"],["GST calculator","gst"],["Percentage","percent"],["Unit converter","unit"],["Date difference","datediff"],["PDF dark mode","dark"],["OCR","ocr"],["Word count","wordcount"],["N-up","nup"],["Header and footer","headfoot"],["Remove annotations","rmannot"],["File fingerprint","hash"],["Remove background","bgremove"],["Social media resize","social"],["Image enlarger","enlarge"],["Meme maker","meme"],["Collage","collage"],["HEIC to JPG","heic"],["Colour palette","palette"],["Reverse pages","reverse"],["Passport photo sheet","photosheet"],["Join images","join"],["Watermark image","imgwm"],["Grayscale PDF","gray"],["A4 resize","a4"],["Image to Base64","base64"]];
 const chipHtml = CHIPS.map(c => `<button class="chip" data-id="${c[1]}">${c[0]}</button>`).join("");
 $("mq").innerHTML = chipHtml + chipHtml;
 $("mq").onclick = e => { const c = e.target.closest(".chip"); if (c) openTool(c.dataset.id); };
