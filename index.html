@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>YourX — PDF & Image tools, 100% in your browser</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%232F5BFF'/%3E%3Cpath d='M10 10l12 12M22 10L10 22' stroke='white' stroke-width='3.5' stroke-linecap='round'/%3E%3C/svg%3E">
+<title>YourX — PDF & Image tools</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23C6F135'/%3E%3Cpath d='M10 10l12 12M22 10L10 22' stroke='%230A0A0A' stroke-width='3.5' stroke-linecap='round'/%3E%3C/svg%3E">
 <meta name="description" content="Merge, split, sign, OCR, compress and convert PDFs and images. Files never leave your device.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -18,371 +18,560 @@
 <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
 <style>
 :root{
-  --bg:#F4F6FB;--ink:#0B1220;--mut:#5A6478;--card:#FFFFFF;--line:#E3E8F2;
-  --acc:#2F5BFF;--acc2:#8B5CF6;--onacc:#fff;--soft:#F8FAFF;
-  --sh1:0 1px 2px rgba(11,18,32,.05);--sh2:0 12px 28px -12px rgba(11,18,32,.18);
-  --sh3:0 24px 48px -20px rgba(11,18,32,.28);
-  --r:20px;--r2:28px;color-scheme:light;
+  --bg:#0A0A0A; --bg2:#111111; --panel:#141414; --panel2:#1A1A1A;
+  --ink:#F5F5F5; --ink2:#A3A3A3; --ink3:#6B6B6B;
+  --line:#242424; --line2:#2E2E2E;
+  --acc:#C6F135; --acc2:#8BE84B; --onacc:#0A0A0A;
+  --mono:"JetBrains Mono",ui-monospace,monospace;
+  --r:4px; --r2:8px; --r3:14px;
+  color-scheme:dark;
 }
-:root[data-theme=dark]{
-  --bg:#080D1A;--ink:#EEF2FF;--mut:#98A2B8;--card:#121A2E;--line:#26314B;
-  --acc:#7C9BFF;--acc2:#B79BFF;--onacc:#080D1A;--soft:#0D1426;
-  --sh1:0 1px 2px rgba(0,0,0,.3);--sh2:0 12px 28px -12px rgba(0,0,0,.5);
-  --sh3:0 24px 48px -20px rgba(0,0,0,.7);color-scheme:dark;
+:root[data-theme=light]{
+  --bg:#FAFAFA; --bg2:#F2F2F2; --panel:#FFFFFF; --panel2:#F7F7F7;
+  --ink:#0A0A0A; --ink2:#555555; --ink3:#888888;
+  --line:#E5E5E5; --line2:#D4D4D4;
+  --acc:#0A0A0A; --acc2:#333333; --onacc:#C6F135;
+  color-scheme:light;
 }
-@media(prefers-color-scheme:dark){:root:not([data-theme=light]){
-  --bg:#080D1A;--ink:#EEF2FF;--mut:#98A2B8;--card:#121A2E;--line:#26314B;
-  --acc:#7C9BFF;--acc2:#B79BFF;--onacc:#080D1A;--soft:#0D1426;
-  --sh1:0 1px 2px rgba(0,0,0,.3);--sh2:0 12px 28px -12px rgba(0,0,0,.5);
-  --sh3:0 24px 48px -20px rgba(0,0,0,.7);color-scheme:dark;
+@media(prefers-color-scheme:light){:root:not([data-theme=dark]){
+  --bg:#FAFAFA; --bg2:#F2F2F2; --panel:#FFFFFF; --panel2:#F7F7F7;
+  --ink:#0A0A0A; --ink2:#555555; --ink3:#888888;
+  --line:#E5E5E5; --line2:#D4D4D4;
+  --acc:#0A0A0A; --acc2:#333333; --onacc:#C6F135;
+  color-scheme:light;
 }}
 *{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
+html{-webkit-text-size-adjust:100%}
 body{
-  font-family:"Plus Jakarta Sans",system-ui,-apple-system,sans-serif;
-  background:var(--bg);color:var(--ink);line-height:1.55;
-  -webkit-font-smoothing:antialiased;min-height:100vh;overflow-x:hidden;
+  font-family:"Inter Tight",system-ui,-apple-system,sans-serif;
+  background:var(--bg);color:var(--ink);line-height:1.5;
+  -webkit-font-smoothing:antialiased;min-height:100vh;
+  font-feature-settings:"ss01","cv01","cv11";
+  overflow-x:hidden;
 }
 a,button,input,select,textarea{font:inherit;color:inherit}
 button{cursor:pointer;border:0;background:none}
-:focus-visible{outline:2.5px solid var(--acc);outline-offset:2px;border-radius:8px}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
 ::selection{background:var(--acc);color:var(--onacc)}
-.wrap{max-width:1200px;margin:0 auto;padding:0 20px;position:relative;z-index:1}
+.wrap{max-width:1280px;margin:0 auto;padding:0 24px;position:relative;z-index:2}
 
-/* ambient bg */
-.bg{position:fixed;inset:0;overflow:hidden;z-index:0;pointer-events:none}
-.bg i{position:absolute;width:44vmax;height:44vmax;border-radius:50%;filter:blur(100px);opacity:.4}
-.bg i:nth-child(1){background:#7C9BFF;top:-18vmax;left:-12vmax}
-.bg i:nth-child(2){background:#FFB4A2;right:-18vmax;top:8vmax;opacity:.32}
-.bg i:nth-child(3){background:#A8E6E0;bottom:-22vmax;left:22vw;opacity:.28}
-:root[data-theme=dark] .bg i{opacity:.16}
-@media(prefers-color-scheme:dark){:root:not([data-theme=light]) .bg i{opacity:.16}}
+/* ===== Background: grid + glow ===== */
+.bg-grid{
+  position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:
+    linear-gradient(var(--line) 1px,transparent 1px),
+    linear-gradient(90deg,var(--line) 1px,transparent 1px);
+  background-size:56px 56px;
+  mask-image:radial-gradient(ellipse 80% 60% at 50% 0%,#000 40%,transparent 100%);
+  -webkit-mask-image:radial-gradient(ellipse 80% 60% at 50% 0%,#000 40%,transparent 100%);
+  opacity:.5;
+}
+.bg-glow{
+  position:fixed;z-index:0;pointer-events:none;left:50%;top:-20%;width:1200px;height:1200px;
+  transform:translateX(-50%);
+  background:radial-gradient(circle,color-mix(in srgb,var(--acc) 22%,transparent),transparent 60%);
+  opacity:.35;filter:blur(40px);
+}
+:root[data-theme=light] .bg-glow{opacity:.15}
+@media(prefers-color-scheme:light){:root:not([data-theme=dark]) .bg-glow{opacity:.15}}
 
-/* header */
+/* ===== Header ===== */
 header{
-  position:sticky;top:0;z-index:50;backdrop-filter:blur(20px) saturate(1.4);
-  background:color-mix(in srgb,var(--bg) 78%,transparent);
-  border-bottom:1px solid color-mix(in srgb,var(--line) 60%,transparent);
+  position:sticky;top:0;z-index:50;
+  background:color-mix(in srgb,var(--bg) 72%,transparent);
+  backdrop-filter:blur(20px) saturate(1.5);
+  -webkit-backdrop-filter:blur(20px) saturate(1.5);
+  border-bottom:1px solid var(--line);
 }
-.hd{display:flex;align-items:center;justify-content:space-between;padding:14px 0;gap:14px}
-.logo{display:flex;align-items:center;gap:11px;font-weight:800;font-size:1.28rem;letter-spacing:-.03em}
-.logo svg{filter:drop-shadow(0 6px 14px rgba(80,90,255,.35));transition:transform .5s cubic-bezier(.2,1.4,.4,1)}
-.logo:hover svg{transform:rotate(180deg)}
-.actions{display:flex;align-items:center;gap:8px}
-.pill{
-  font-size:.82rem;color:var(--mut);border:1px solid var(--line);border-radius:99px;
-  padding:7px 14px;font-weight:500;background:var(--card);white-space:nowrap;
-  display:flex;align-items:center;gap:7px;
+.hd{display:flex;align-items:center;justify-content:space-between;padding:14px 0;gap:16px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:1.05rem;letter-spacing:-.02em}
+.brand .mark{
+  width:28px;height:28px;border-radius:6px;background:var(--acc);color:var(--onacc);
+  display:grid;place-items:center;flex:none;
+  transition:transform .5s cubic-bezier(.34,1.56,.64,1);
 }
-.pill::before{content:"";width:7px;height:7px;border-radius:50%;background:#12B76A;box-shadow:0 0 0 3px rgba(18,183,106,.18)}
-.icb{
-  width:40px;height:40px;border-radius:12px;border:1px solid var(--line);background:var(--card);
-  display:grid;place-items:center;transition:.2s;color:var(--ink);flex:none;
+.brand:hover .mark{transform:rotate(135deg)}
+.brand .mark svg{width:14px;height:14px;stroke:currentColor;stroke-width:3;fill:none;stroke-linecap:round}
+.brand .ver{
+  font-family:var(--mono);font-size:.68rem;color:var(--ink3);
+  border:1px solid var(--line);padding:2px 6px;border-radius:4px;letter-spacing:.02em;
 }
-.icb:hover{background:var(--soft);border-color:var(--acc);color:var(--acc);transform:translateY(-2px)}
-.icb svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.hd-right{display:flex;align-items:center;gap:10px}
+.stat{
+  display:none;align-items:center;gap:8px;font-family:var(--mono);font-size:.72rem;
+  color:var(--ink2);padding:6px 10px;border:1px solid var(--line);border-radius:6px;
+  background:var(--panel);letter-spacing:.02em;
+}
+.stat .dot{width:6px;height:6px;border-radius:50%;background:var(--acc);box-shadow:0 0 0 0 var(--acc);animation:pulse 2.4s infinite}
+.btn{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:8px 12px;border:1px solid var(--line);border-radius:6px;
+  background:var(--panel);font-size:.82rem;font-weight:500;
+  color:var(--ink2);transition:all .18s cubic-bezier(.2,.8,.2,1);
+  font-family:var(--mono);letter-spacing:.01em;
+}
+.btn:hover{color:var(--ink);border-color:var(--line2);background:var(--panel2)}
+.btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 
-/* hero */
-.hero{padding:64px 0 40px;display:grid;grid-template-columns:1.15fr .85fr;gap:40px;align-items:center}
-.kicker{
-  display:inline-flex;align-items:center;gap:8px;font-size:.78rem;font-weight:700;
-  text-transform:uppercase;letter-spacing:.12em;color:var(--acc);
-  background:color-mix(in srgb,var(--acc) 10%,transparent);
-  padding:7px 14px;border-radius:99px;margin-bottom:20px;
+@media(min-width:720px){.stat{display:inline-flex}}
+
+/* ===== Hero ===== */
+.hero{padding:72px 0 44px;max-width:900px}
+.tag{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:var(--mono);font-size:.72rem;font-weight:500;
+  color:var(--ink2);text-transform:uppercase;letter-spacing:.14em;
+  padding:6px 12px;border:1px solid var(--line);border-radius:99px;
+  background:var(--panel);margin-bottom:28px;
+  animation:fadeUp .7s cubic-bezier(.2,.8,.2,1) backwards;
 }
+.tag .dot{width:6px;height:6px;border-radius:50%;background:var(--acc);animation:pulse 2.4s infinite}
 h1{
-  font-size:clamp(2.4rem,6.5vw,4.2rem);line-height:1.04;letter-spacing:-.04em;
-  font-weight:800;margin-bottom:20px;
+  font-size:clamp(2.6rem,8vw,5.2rem);line-height:.96;
+  letter-spacing:-.045em;font-weight:800;margin-bottom:24px;
+  animation:fadeUp .8s cubic-bezier(.2,.8,.2,1) .05s backwards;
 }
-h1 em{
-  font-style:normal;
-  background:linear-gradient(120deg,var(--acc),var(--acc2));
-  -webkit-background-clip:text;background-clip:text;color:transparent;
+h1 .dim{color:var(--ink3);font-weight:400;font-style:italic;letter-spacing:-.02em}
+h1 .acc{
+  color:var(--acc);
+  position:relative;display:inline-block;
 }
-.lead{font-size:1.13rem;color:var(--mut);max-width:520px;margin-bottom:30px}
-.searchbox{position:relative;max-width:520px}
-.searchbox svg{
-  position:absolute;left:20px;top:50%;transform:translateY(-50%);
-  width:19px;height:19px;stroke:var(--mut);fill:none;stroke-width:2;stroke-linecap:round;
+h1 .acc::after{
+  content:"";position:absolute;left:0;right:0;bottom:.08em;height:.08em;
+  background:var(--acc);border-radius:2px;
+  transform:scaleX(0);transform-origin:left;
+  animation:underline 1s cubic-bezier(.2,.8,.2,1) 1s forwards;
+}
+.lead{
+  font-size:1.1rem;color:var(--ink2);max-width:560px;margin-bottom:32px;
+  animation:fadeUp .8s cubic-bezier(.2,.8,.2,1) .15s backwards;
+}
+
+/* Search */
+.searchwrap{
+  position:relative;max-width:520px;
+  animation:fadeUp .8s cubic-bezier(.2,.8,.2,1) .25s backwards;
+}
+.searchwrap svg{
+  position:absolute;left:16px;top:50%;transform:translateY(-50%);
+  width:16px;height:16px;stroke:var(--ink3);fill:none;stroke-width:2;stroke-linecap:round;
+  pointer-events:none;
 }
 .search{
-  width:100%;border:1.5px solid var(--line);background:var(--card);border-radius:16px;
-  padding:15px 20px 15px 52px;font-size:1rem;box-shadow:var(--sh1);transition:.2s;
+  width:100%;background:var(--panel);border:1px solid var(--line);
+  border-radius:8px;padding:14px 16px 14px 44px;font-size:.95rem;
+  transition:all .2s;
 }
-.search:focus{outline:none;border-color:var(--acc);box-shadow:0 0 0 4px color-mix(in srgb,var(--acc) 15%,transparent)}
-.search::placeholder{color:var(--mut)}
-
-/* hero visual */
-.hv{position:relative;height:340px;display:grid;place-items:center}
-.doc{
-  position:absolute;width:180px;height:230px;border-radius:18px;background:var(--card);
-  border:1px solid var(--line);box-shadow:var(--sh3);
-  display:flex;flex-direction:column;padding:22px 18px;gap:9px;
-  animation:float 8s ease-in-out infinite;
-}
-.doc:nth-child(1){transform:rotate(-11deg) translate(-72px,10px);animation-delay:-1s;border-top:8px solid #B8E0FF}
-.doc:nth-child(2){transform:rotate(2deg);z-index:2;border-top:8px solid #FFE69A;animation-delay:-3s}
-.doc:nth-child(3){transform:rotate(13deg) translate(72px,10px);animation-delay:-5s;border-top:8px solid #FFB4A2}
-.doc b{height:9px;border-radius:99px;background:var(--line)}
-.doc b:nth-child(1){width:70%;background:var(--acc);opacity:.65}
-.doc b:nth-child(2){width:100%}
-.doc b:nth-child(3){width:85%}
-.doc b:nth-child(4){width:60%}
-.doc b:nth-child(5){width:100%}
-.doc b:nth-child(6){width:40%}
-.doc::after{
-  content:"";position:absolute;right:12px;bottom:12px;width:34px;height:34px;border-radius:10px;
-  background:linear-gradient(135deg,var(--acc),var(--acc2));opacity:.9;
+.search:hover{border-color:var(--line2)}
+.search:focus{outline:none;border-color:var(--acc);box-shadow:0 0 0 3px color-mix(in srgb,var(--acc) 22%,transparent)}
+.search::placeholder{color:var(--ink3)}
+.search kbd{
+  position:absolute;right:12px;top:50%;transform:translateY(-50%);
+  font-family:var(--mono);font-size:.7rem;color:var(--ink3);
+  padding:3px 6px;border:1px solid var(--line);border-radius:4px;
+  background:var(--bg2);pointer-events:none;
 }
 
-/* marquee */
-.marq{
-  overflow:hidden;margin:16px -20px 40px;
-  -webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);
-  mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);
+/* ===== Toolbar (chips) ===== */
+.toolbar{
+  display:flex;gap:8px;flex-wrap:wrap;padding-bottom:44px;
+  animation:fadeUp .8s cubic-bezier(.2,.8,.2,1) .35s backwards;
 }
-.marq div{display:flex;gap:10px;width:max-content;animation:mq 40s linear infinite}
-.marq:hover div{animation-play-state:paused}
-.chip{
-  border:1px solid var(--line);background:var(--card);border-radius:99px;
-  padding:9px 18px;font-weight:600;font-size:.87rem;color:var(--mut);
-  white-space:nowrap;transition:.25s;cursor:pointer;
+.tab{
+  display:inline-flex;align-items:center;gap:7px;
+  font-family:var(--mono);font-size:.75rem;font-weight:500;
+  color:var(--ink2);padding:7px 12px;border:1px solid var(--line);
+  border-radius:6px;background:var(--panel);
+  transition:all .18s cubic-bezier(.2,.8,.2,1);white-space:nowrap;
+  letter-spacing:.01em;
 }
-.chip:hover{background:var(--acc);color:var(--onacc);border-color:var(--acc);transform:translateY(-2px)}
+.tab:hover{color:var(--ink);border-color:var(--acc);background:var(--panel2);transform:translateY(-1px)}
+.tab .n{color:var(--ink3);font-size:.68rem}
+.tab[data-active]{background:var(--acc);color:var(--onacc);border-color:var(--acc)}
+.tab[data-active] .n{color:var(--onacc);opacity:.6}
 
-/* section titles */
-.sec{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:20px;gap:16px;flex-wrap:wrap}
-.sec h2{font-size:1.5rem;letter-spacing:-.03em;font-weight:800}
-.sec p{color:var(--mut);font-size:.92rem}
+/* ===== Section label ===== */
+.slabel{
+  display:flex;align-items:center;justify-content:space-between;
+  padding-bottom:16px;border-bottom:1px solid var(--line);margin-bottom:24px;gap:12px;
+}
+.slabel h2{
+  font-family:var(--mono);font-size:.72rem;font-weight:500;
+  color:var(--ink3);text-transform:uppercase;letter-spacing:.16em;
+}
+.slabel .count{
+  font-family:var(--mono);font-size:.72rem;color:var(--ink3);
+}
 
-/* grid */
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;padding-bottom:64px}
+/* ===== Grid ===== */
+.grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
+  gap:1px;background:var(--line);border:1px solid var(--line);
+  border-radius:var(--r3);overflow:hidden;margin-bottom:64px;
+}
 .tile{
-  position:relative;text-align:left;background:var(--card);border:1px solid var(--line);
-  border-radius:var(--r);padding:22px;display:flex;flex-direction:column;gap:14px;
-  transition:transform .3s cubic-bezier(.2,.8,.2,1),box-shadow .3s,border-color .3s;
-  overflow:hidden;min-height:180px;color:var(--ink);
+  position:relative;text-align:left;background:var(--bg);color:var(--ink);
+  padding:22px;min-height:170px;display:flex;flex-direction:column;
+  justify-content:space-between;gap:16px;
+  transition:background .25s cubic-bezier(.2,.8,.2,1);
+  overflow:hidden;isolation:isolate;
 }
 .tile::before{
-  content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;
-  background:linear-gradient(135deg,transparent,transparent);
-  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
-  -webkit-mask-composite:xor;mask-composite:exclude;transition:.35s;pointer-events:none;
+  content:"";position:absolute;inset:0;background:var(--panel);
+  opacity:0;transition:opacity .3s;z-index:-1;
 }
-.tile:hover{transform:translateY(-4px);box-shadow:var(--sh2);border-color:transparent}
-.tile:hover::before{background:linear-gradient(135deg,var(--acc),var(--acc2))}
+.tile:hover::before{opacity:1}
+.tile .num{
+  position:absolute;top:14px;right:16px;
+  font-family:var(--mono);font-size:.68rem;color:var(--ink3);
+  letter-spacing:.02em;transition:color .25s;
+}
+.tile:hover .num{color:var(--acc)}
 .tile .ic{
-  width:48px;height:48px;border-radius:14px;display:grid;place-items:center;
-  background:var(--soft);color:var(--acc);flex:none;
+  width:38px;height:38px;display:grid;place-items:center;
+  border:1px solid var(--line);border-radius:var(--r2);
+  color:var(--ink2);background:var(--bg2);
+  transition:all .3s cubic-bezier(.34,1.56,.64,1);
 }
-.tile .ic svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;transition:transform .35s cubic-bezier(.2,1.4,.4,1)}
-.tile:hover .ic svg{transform:scale(1.12) rotate(-6deg)}
-.tile h3{font-size:1.02rem;font-weight:700;letter-spacing:-.015em;margin-bottom:3px}
-.tile p{font-size:.86rem;color:var(--mut);line-height:1.45}
-.tile .arr{
-  position:absolute;top:22px;right:22px;width:26px;height:26px;border-radius:50%;
-  background:var(--soft);display:grid;place-items:center;opacity:0;transform:translateX(-4px);transition:.3s;
+.tile:hover .ic{
+  border-color:var(--acc);color:var(--acc);background:var(--bg2);
+  transform:rotate(-8deg) scale(1.05);
 }
-.tile .arr svg{width:13px;height:13px;stroke:var(--acc);fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
-.tile:hover .arr{opacity:1;transform:translateX(0)}
+.tile .ic svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.tile h3{
+  font-size:1rem;font-weight:600;letter-spacing:-.015em;
+  margin-bottom:4px;transition:color .2s;
+}
+.tile:hover h3{color:var(--acc)}
+.tile p{font-size:.82rem;color:var(--ink3);line-height:1.45}
+.tile .arrow{
+  position:absolute;bottom:20px;right:20px;
+  width:20px;height:20px;opacity:0;
+  transform:translate(-6px,6px);
+  transition:all .28s cubic-bezier(.2,.8,.2,1);
+  color:var(--acc);
+}
+.tile:hover .arrow{opacity:1;transform:translate(0,0)}
+.tile .arrow svg{width:100%;height:100%;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 
-/* trust */
-.trust{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;padding-bottom:64px}
-.trust>div{
-  background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:22px;
-  display:flex;gap:14px;align-items:flex-start;
-}
-.trust .ic{width:42px;height:42px;border-radius:12px;background:color-mix(in srgb,var(--acc) 12%,transparent);display:grid;place-items:center;color:var(--acc);flex:none}
-.trust .ic svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
-.trust b{display:block;font-size:1rem;margin-bottom:3px;font-weight:700}
-.trust span{color:var(--mut);font-size:.9rem;line-height:1.5}
+/* Tile stagger */
+.tile{animation:tileIn .5s cubic-bezier(.2,.8,.2,1) backwards;animation-delay:calc(var(--i,0) * 18ms)}
 
-/* footer */
-footer{border-top:1px solid var(--line);padding:28px 0 40px;color:var(--mut);font-size:.88rem;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
-footer .fl{display:flex;gap:20px;flex-wrap:wrap}
-footer a{color:var(--mut);text-decoration:none;transition:.2s}
+/* ===== Trust ===== */
+.trust{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:1px;background:var(--line);border:1px solid var(--line);
+  border-radius:var(--r3);overflow:hidden;margin-bottom:80px;
+}
+.trust>div{background:var(--bg);padding:24px;display:flex;flex-direction:column;gap:14px}
+.trust .t-ic{
+  width:32px;height:32px;display:grid;place-items:center;
+  border:1px solid var(--line);border-radius:6px;color:var(--acc);
+}
+.trust .t-ic svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.trust b{font-size:.95rem;font-weight:600;letter-spacing:-.01em}
+.trust span{font-size:.82rem;color:var(--ink3);line-height:1.5}
+
+/* ===== Footer ===== */
+footer{
+  border-top:1px solid var(--line);padding:28px 0 48px;
+  display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;
+  font-family:var(--mono);font-size:.72rem;color:var(--ink3);
+  letter-spacing:.02em;
+}
+footer .links{display:flex;gap:20px;flex-wrap:wrap}
+footer a{color:var(--ink3);text-decoration:none;transition:color .18s}
 footer a:hover{color:var(--acc)}
 
-/* dialog */
+/* ===== Dialog ===== */
 dialog{
-  border:0;border-radius:var(--r2);padding:0;width:min(660px,calc(100% - 24px));
-  background:var(--card);color:var(--ink);max-height:92vh;overflow:auto;box-shadow:var(--sh3);
+  border:0;border-radius:var(--r3);padding:0;
+  width:min(600px,calc(100% - 24px));
+  background:var(--bg);color:var(--ink);
+  max-height:92vh;overflow:auto;
+  box-shadow:0 40px 100px -20px rgba(0,0,0,.7),0 0 0 1px var(--line);
 }
-dialog::backdrop{background:rgba(8,12,24,.55);backdrop-filter:blur(6px)}
-dialog[open]{animation:pop .35s cubic-bezier(.2,1.1,.3,1)}
-.dh{display:flex;gap:16px;align-items:flex-start;padding:28px 28px 20px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--card);z-index:2;border-radius:var(--r2) var(--r2) 0 0}
-.dh .di{width:52px;height:52px;border-radius:16px;display:grid;place-items:center;background:color-mix(in srgb,var(--acc) 12%,transparent);color:var(--acc);flex:none}
-.dh .di svg{width:26px;height:26px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
-.dh h2{font-size:1.35rem;letter-spacing:-.025em;font-weight:800;margin-bottom:3px}
-.dh p{color:var(--mut);font-size:.89rem;line-height:1.5}
-.x{width:38px;height:38px;border-radius:12px;border:1px solid var(--line);background:var(--card);display:grid;place-items:center;flex:none;transition:.2s;color:var(--mut)}
-.x:hover{background:var(--soft);color:var(--ink)}
-.x svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round}
-.db{padding:22px 28px 28px}
+dialog::backdrop{background:rgba(0,0,0,.6);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+dialog[open]{animation:dlgIn .32s cubic-bezier(.2,1.1,.3,1)}
+.dh{
+  display:flex;gap:14px;align-items:flex-start;
+  padding:22px 22px 18px;border-bottom:1px solid var(--line);
+  position:sticky;top:0;background:var(--bg);z-index:2;
+  border-radius:var(--r3) var(--r3) 0 0;
+}
+.dh .di{
+  width:38px;height:38px;display:grid;place-items:center;flex:none;
+  border:1px solid var(--line);border-radius:var(--r2);
+  color:var(--acc);background:var(--bg2);
+}
+.dh .di svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.dh .txt{flex:1;min-width:0}
+.dh h2{font-size:1.1rem;font-weight:700;letter-spacing:-.02em;margin-bottom:2px}
+.dh p{color:var(--ink3);font-size:.82rem;line-height:1.45}
+.x{
+  width:32px;height:32px;border:1px solid var(--line);border-radius:6px;
+  display:grid;place-items:center;flex:none;transition:all .18s;color:var(--ink2);
+  background:var(--panel);
+}
+.x:hover{color:var(--ink);border-color:var(--line2);background:var(--panel2)}
+.x svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round}
+.db{padding:22px}
+
+/* Drop zone */
 .drop{
-  border:2px dashed var(--line);border-radius:18px;padding:32px 20px;text-align:center;
-  cursor:pointer;color:var(--mut);transition:.2s;background:var(--soft);
+  border:1.5px dashed var(--line2);border-radius:var(--r2);
+  padding:32px 20px;text-align:center;color:var(--ink3);
+  cursor:pointer;transition:all .2s;background:var(--panel);
 }
-.drop:hover,.drop.on{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 7%,transparent);color:var(--ink)}
-.drop svg{display:block;margin:0 auto 10px;width:38px;height:38px;stroke:var(--acc);fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
-.drop b{display:block;color:var(--ink);font-size:1.02rem;margin-bottom:3px;font-weight:700}
-.drop span{font-size:.86rem}
+.drop:hover,.drop.on{
+  border-color:var(--acc);background:color-mix(in srgb,var(--acc) 5%,var(--panel));
+  color:var(--ink);
+}
+.drop .up{
+  width:44px;height:44px;margin:0 auto 12px;display:grid;place-items:center;
+  border:1px solid var(--line);border-radius:var(--r2);
+  color:var(--acc);background:var(--bg2);
+  transition:transform .3s cubic-bezier(.34,1.56,.64,1);
+}
+.drop:hover .up{transform:translateY(-3px)}
+.drop .up svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.drop b{display:block;color:var(--ink);font-size:.95rem;font-weight:600;margin-bottom:3px;letter-spacing:-.01em}
+.drop span{font-size:.82rem}
 
-ul{list-style:none;margin-top:14px;display:grid;gap:8px}
+/* File list */
+ul{list-style:none;margin-top:14px;display:grid;gap:6px}
 li{
-  display:flex;align-items:center;gap:12px;border:1px solid var(--line);
-  border-radius:14px;padding:10px 12px;font-size:.9rem;background:var(--card);
+  display:flex;align-items:center;gap:10px;
+  border:1px solid var(--line);border-radius:var(--r2);
+  padding:8px 10px;font-size:.85rem;background:var(--panel);
+  animation:listIn .3s cubic-bezier(.2,.8,.2,1) backwards;
 }
-li .th{width:42px;height:52px;border-radius:8px;flex:none;background:var(--soft);border:1px solid var(--line);object-fit:cover}
+li .th{
+  width:32px;height:40px;border-radius:5px;flex:none;
+  background:var(--bg2);border:1px solid var(--line);
+  object-fit:cover;display:grid;place-items:center;
+  font-family:var(--mono);font-size:.6rem;color:var(--ink3);
+}
 li .nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}
-li small{color:var(--mut);font-size:.78rem;font-variant-numeric:tabular-nums}
-li button{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;color:var(--mut);transition:.15s}
-li button:hover{background:var(--soft);color:var(--ink)}
-li button svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round}
+li small{color:var(--ink3);font-size:.72rem;font-family:var(--mono);font-variant-numeric:tabular-nums}
+li button{
+  width:24px;height:24px;border-radius:5px;display:grid;place-items:center;
+  color:var(--ink3);transition:all .15s;
+}
+li button:hover{background:var(--bg2);color:var(--ink)}
+li button svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round}
 
-.opt{margin-top:18px;display:grid;gap:12px}
-.opt label{font-weight:600;font-size:.88rem;margin-bottom:5px;display:block;color:var(--ink)}
+/* Options */
+.opt{margin-top:18px;display:grid;gap:14px}
+.opt label{
+  display:block;font-family:var(--mono);font-size:.68rem;font-weight:500;
+  color:var(--ink3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;
+}
 .opt input,.opt select,.opt textarea{
-  border:1.5px solid var(--line);background:var(--soft);border-radius:12px;
-  padding:11px 14px;width:100%;transition:.2s;font-size:.94rem;
+  width:100%;background:var(--panel);border:1px solid var(--line);
+  border-radius:6px;padding:10px 12px;font-size:.88rem;transition:all .18s;
+  font-family:inherit;
 }
+.opt textarea{min-height:80px;resize:vertical;font-family:var(--mono);font-size:.82rem}
+.opt input:hover,.opt select:hover,.opt textarea:hover{border-color:var(--line2)}
 .opt input:focus,.opt select:focus,.opt textarea:focus{
-  outline:none;border-color:var(--acc);background:var(--card);
-  box-shadow:0 0 0 4px color-mix(in srgb,var(--acc) 12%,transparent);
+  outline:none;border-color:var(--acc);
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--acc) 18%,transparent);
 }
-.opt textarea{min-height:80px;resize:vertical;font-family:inherit}
+.opt input[type=checkbox]{
+  width:auto;padding:0;border:0;background:none;
+  accent-color:var(--acc);margin-right:8px;vertical-align:middle;
+}
+.opt .chk{
+  display:flex;align-items:center;padding:10px 12px;border:1px solid var(--line);
+  border-radius:6px;background:var(--panel);cursor:pointer;transition:all .18s;
+  font-family:inherit;font-size:.85rem;text-transform:none;letter-spacing:0;
+  color:var(--ink);margin-bottom:0;
+}
+.opt .chk:hover{border-color:var(--line2);background:var(--panel2)}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 @media(max-width:520px){.row2{grid-template-columns:1fr}}
 
+/* Go button */
 .go{
-  margin-top:22px;width:100%;border-radius:14px;
-  background:linear-gradient(120deg,var(--acc),var(--acc2));color:var(--onacc);
-  font-weight:700;font-size:1rem;padding:15px;transition:.2s;
-  box-shadow:0 10px 24px -10px color-mix(in srgb,var(--acc) 60%,transparent);
+  margin-top:20px;width:100%;border-radius:8px;
+  background:var(--acc);color:var(--onacc);
+  font-weight:700;font-size:.92rem;padding:14px;
+  transition:all .2s cubic-bezier(.2,.8,.2,1);
+  letter-spacing:-.005em;
+  position:relative;overflow:hidden;
 }
-.go:not(:disabled):hover{transform:translateY(-2px);box-shadow:0 16px 30px -10px color-mix(in srgb,var(--acc) 70%,transparent)}
-.go:disabled{opacity:.4;cursor:not-allowed;box-shadow:none}
+.go::before{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(120deg,transparent 30%,rgba(255,255,255,.35) 50%,transparent 70%);
+  transform:translateX(-100%);transition:transform .6s;
+}
+.go:not(:disabled):hover::before{transform:translateX(100%)}
+.go:not(:disabled):hover{transform:translateY(-1px);box-shadow:0 8px 24px -8px color-mix(in srgb,var(--acc) 60%,transparent)}
+.go:disabled{opacity:.35;cursor:not-allowed}
 .go.busy{background:linear-gradient(90deg,var(--acc),var(--acc2),var(--acc));background-size:200% 100%;animation:sh 1.2s linear infinite}
+.go.busy:disabled{opacity:1}
 
-.msg{margin-top:14px;font-size:.9rem;min-height:1.3em;color:var(--mut);text-align:center}
-.msg.err{color:#E53E3E;font-weight:500}
-.msg.ok{color:#12B76A;font-weight:500}
+.msg{
+  margin-top:14px;font-family:var(--mono);font-size:.75rem;
+  min-height:1.2em;color:var(--ink3);text-align:center;
+  letter-spacing:.01em;
+}
+.msg.err{color:#FF5C5C}
+.msg.ok{color:var(--acc)}
 .res{margin-top:14px}
 .res a{
   display:flex;align-items:center;justify-content:center;gap:8px;
-  text-decoration:none;background:linear-gradient(120deg,#12B76A,#059669);
-  color:#fff;border-radius:14px;padding:15px;font-weight:700;
-  box-shadow:0 10px 24px -10px rgba(18,183,106,.6);transition:.2s;
+  text-decoration:none;background:var(--acc);color:var(--onacc);
+  border-radius:8px;padding:14px;font-weight:700;font-size:.9rem;
+  transition:all .2s cubic-bezier(.2,.8,.2,1);
+  animation:dlgIn .35s cubic-bezier(.2,1.2,.3,1);
 }
-.res a:hover{transform:translateY(-2px)}
-.res a svg{width:18px;height:18px;stroke:#fff;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.res a:hover{transform:translateY(-1px);box-shadow:0 10px 24px -8px color-mix(in srgb,var(--acc) 60%,transparent)}
+.res a svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
 
-/* qr preview */
-.qrbox{margin-top:16px;display:flex;justify-content:center;padding:18px;background:#fff;border-radius:16px;border:1px solid var(--line)}
-.qrbox canvas,.qrbox img{display:block;border-radius:8px}
-.sigbox{margin-top:14px;border:1.5px dashed var(--line);border-radius:14px;background:var(--soft);padding:10px;touch-action:none}
-.sigbox canvas{display:block;width:100%;height:180px;border-radius:10px;background:#fff;cursor:crosshair}
-.scanner{margin-top:14px;border-radius:16px;overflow:hidden;background:#000;position:relative;aspect-ratio:1/1;max-width:340px;margin-inline:auto}
+/* QR preview */
+.qrbox{
+  margin-top:14px;display:flex;justify-content:center;
+  padding:16px;background:#fff;border-radius:10px;border:1px solid var(--line);
+}
+.qrbox canvas,.qrbox img{display:block}
+
+/* Signature */
+.sigbox{
+  margin-top:12px;border:1px solid var(--line);border-radius:8px;
+  background:#fff;padding:8px;touch-action:none;
+}
+.sigbox canvas{display:block;width:100%;height:170px;border-radius:4px;background:#fff;cursor:crosshair}
+
+/* Scanner */
+.scanner{
+  margin-top:12px;border-radius:10px;overflow:hidden;background:#000;
+  position:relative;aspect-ratio:1/1;max-width:340px;margin-inline:auto;
+  border:1px solid var(--line);
+}
 .scanner video{width:100%;height:100%;object-fit:cover;display:block}
-.scanner::after{content:"";position:absolute;inset:14%;border:3px solid var(--acc);border-radius:16px;pointer-events:none;box-shadow:0 0 0 100vmax rgba(0,0,0,.35);clip-path:polygon(0 0,100% 0,100% 100%,0 100%,0 0,14% 14%,14% 86%,86% 86%,86% 14%,14% 14%)}
+.scanner::after{
+  content:"";position:absolute;inset:16%;border:2px solid var(--acc);
+  border-radius:8px;pointer-events:none;
+  box-shadow:0 0 0 100vmax rgba(0,0,0,.45);
+  clip-path:polygon(0 0,100% 0,100% 100%,0 100%,0 0,16% 16%,16% 84%,84% 84%,84% 16%,16% 16%);
+}
 
-.empty{color:var(--mut);padding:40px 0;text-align:center;grid-column:1/-1}
+/* Colour picker */
+.cpimg{
+  margin-top:10px;border-radius:8px;overflow:hidden;
+  border:1px solid var(--line);background:var(--bg2);
+}
+.cpimg img{display:block;max-width:100%;cursor:crosshair}
+.swatches{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.swatch{
+  width:28px;height:28px;border-radius:6px;border:1px solid var(--line);
+  cursor:pointer;transition:transform .15s;
+}
+.swatch:hover{transform:scale(1.15)}
 
-@keyframes mq{to{transform:translateX(-50%)}}
-@keyframes pop{from{opacity:0;transform:scale(.95) translateY(12px)}}
+.empty{
+  grid-column:1/-1;text-align:center;padding:60px 20px;
+  color:var(--ink3);font-family:var(--mono);font-size:.82rem;
+}
+
+/* ===== Animations ===== */
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}}
+@keyframes tileIn{from{opacity:0;transform:translateY(8px)}}
+@keyframes listIn{from{opacity:0;transform:translateX(-6px)}}
+@keyframes dlgIn{from{opacity:0;transform:scale(.96) translateY(10px)}}
 @keyframes sh{to{background-position:-200% 0}}
-@keyframes float{50%{transform:translateY(-16px) rotate(var(--r,0deg))}}
-@media(prefers-reduced-motion:reduce){*,::before,::after{animation:none!important;transition:none!important}}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--acc) 60%,transparent)}50%{box-shadow:0 0 0 6px transparent}}
+@keyframes underline{to{transform:scaleX(1)}}
 
+@media(prefers-reduced-motion:reduce){
+  *,::before,::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
+
+/* ===== Responsive ===== */
 @media(max-width:900px){
-  .hero{grid-template-columns:1fr;padding:44px 0 30px}
-  .hv{display:none}
-  .grid{grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
-  .tile{padding:18px;min-height:150px}
-  .tile .ic{width:42px;height:42px}
-  .tile h3{font-size:.96rem}
-  .tile p{font-size:.82rem}
+  .hero{padding:48px 0 32px}
+  .grid{grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}
+  .tile{min-height:150px;padding:18px}
 }
 @media(max-width:600px){
   .wrap{padding:0 16px}
   .hd{padding:12px 0}
-  .pill{display:none}
-  h1{font-size:2.2rem}
-  .lead{font-size:1rem}
-  .db,.dh{padding-left:20px;padding-right:20px}
-  .grid{grid-template-columns:1fr 1fr;gap:10px}
-  .tile{padding:16px;min-height:auto;gap:10px}
-  .tile .ic{width:38px;height:38px}
-  .tile .ic svg{width:20px;height:20px}
+  h1{font-size:2.2rem;letter-spacing:-.035em}
+  .lead{font-size:.98rem}
+  .grid{grid-template-columns:1fr 1fr}
+  .tile{padding:16px;min-height:auto;gap:12px}
+  .tile .ic{width:34px;height:34px}
+  .tile .ic svg{width:16px;height:16px}
   .tile h3{font-size:.9rem}
-  .tile p{font-size:.78rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-  .tile .arr{display:none}
+  .tile p{font-size:.75rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .tile .num{font-size:.62rem;top:10px;right:12px}
+  .tile .arrow{display:none}
+  .db,.dh{padding:18px}
+  footer{font-size:.68rem}
 }
 </style>
 </head>
 <body>
-<div class="bg" aria-hidden="true"><i></i><i></i><i></i></div>
+<div class="bg-grid" aria-hidden="true"></div>
+<div class="bg-glow" aria-hidden="true"></div>
 <div class="wrap">
 
   <header>
     <div class="hd">
-      <div class="logo">
-        <svg width="34" height="34" viewBox="0 0 32 32" aria-hidden="true"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2F5BFF"/><stop offset="1" stop-color="#9B5CFF"/></linearGradient></defs><rect width="32" height="32" rx="10" fill="url(#lg)"/><path d="M10 10l12 12M22 10L10 22" stroke="#fff" stroke-width="3.4" stroke-linecap="round"/></svg>
+      <div class="brand">
+        <span class="mark"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></span>
         YourX
+        <span class="ver">v2.0</span>
       </div>
-      <div class="actions">
-        <div class="pill">Files never leave your device</div>
-        <button class="icb" id="theme" aria-label="Toggle theme"></button>
+      <div class="hd-right">
+        <div class="stat"><span class="dot"></span>30 tools · offline · no upload</div>
+        <button class="btn" id="theme" aria-label="Toggle theme"></button>
       </div>
     </div>
   </header>
 
   <section class="hero">
-    <div>
-      <div class="kicker">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-        100% in-browser · no uploads
-      </div>
-      <h1>Every PDF & image job, <em>finished in seconds.</em></h1>
-      <p class="lead">Merge, split, sign, OCR, compress, convert — right in your browser. Nothing gets uploaded. Nothing gets stored.</p>
-      <div class="searchbox">
-        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
-        <input class="search" id="q" type="search" placeholder="Search 30+ tools…" aria-label="Search tools">
-      </div>
-    </div>
-    <div class="hv" aria-hidden="true">
-      <div class="doc"><b></b><b></b><b></b><b></b><b></b><b></b></div>
-      <div class="doc"><b></b><b></b><b></b><b></b><b></b><b></b></div>
-      <div class="doc"><b></b><b></b><b></b><b></b><b></b><b></b></div>
+    <div class="tag"><span class="dot"></span>100% client-side · zero upload</div>
+    <h1>PDF & image jobs,<br><span class="dim">done in</span> <span class="acc">seconds.</span></h1>
+    <p class="lead">Merge, split, sign, OCR, compress, convert. Everything runs in your browser — your files never touch a server.</p>
+    <div class="searchwrap">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <input class="search" id="q" type="search" placeholder="Search tools…" aria-label="Search tools">
+      <kbd>Ctrl K</kbd>
     </div>
   </section>
 
-  <div class="marq"><div id="mq"></div></div>
+  <div class="toolbar" id="toolbar"></div>
 
-  <div class="sec">
+  <div class="slabel">
     <h2>All tools</h2>
-    <p id="count"></p>
+    <span class="count" id="count"></span>
   </div>
   <main class="grid" id="grid" aria-label="Tools"></main>
 
   <section class="trust">
     <div>
-      <div class="ic"><svg viewBox="0 0 24 24"><path d="M12 2L4 6v6c0 5 3.4 9.4 8 10 4.6-.6 8-5 8-10V6l-8-4z"/><path d="M9 12l2 2 4-4"/></svg></div>
-      <div><b>No uploads, ever</b><span>Everything runs on your device. Private files stay private.</span></div>
+      <div class="t-ic"><svg viewBox="0 0 24 24"><path d="M12 2L4 6v6c0 5 3.4 9.4 8 10 4.6-.6 8-5 8-10V6l-8-4z"/><path d="M9 12l2 2 4-4"/></svg></div>
+      <b>Zero uploads</b>
+      <span>Every byte stays on your device. Nothing gets logged, stored or sent.</span>
     </div>
     <div>
-      <div class="ic"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
-      <div><b>Instant processing</b><span>No queues, no waiting. Results as fast as your device.</span></div>
+      <div class="t-ic"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+      <b>Instant results</b>
+      <span>No queues or waiting rooms. Speed limited only by your device.</span>
     </div>
     <div>
-      <div class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
-      <div><b>Free, no sign-up</b><span>Pick a tool, add files, download. No account needed.</span></div>
+      <div class="t-ic"><svg viewBox="0 0 24 24"><path d="M12 2v20M2 12h20"/></svg></div>
+      <b>No account needed</b>
+      <span>Open, use, close. No sign-up, no email, no tracking.</span>
     </div>
   </section>
 
   <footer>
-    <div>© <span id="yr"></span> YourX. Crafted for privacy.</div>
-    <div class="fl">
+    <div>© <span id="yr"></span> YourX · built for privacy</div>
+    <div class="links">
       <a href="#" onclick="return false">Privacy</a>
       <a href="#" onclick="return false">Terms</a>
       <a href="#" onclick="return false">GitHub</a>
@@ -393,7 +582,7 @@ li button svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:
 <dialog id="dlg" aria-labelledby="dt">
   <div class="dh">
     <div class="di" id="di"></div>
-    <div style="flex:1"><h2 id="dt"></h2><p id="dd"></p></div>
+    <div class="txt"><h2 id="dt"></h2><p id="dd"></p></div>
     <button class="x" id="close" aria-label="Close">
       <svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
     </button>
@@ -443,8 +632,7 @@ const ICONS = {
   qrscan:'<path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M3 12h18"/>',
   heic:'<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="12" cy="12" r="3"/><path d="M8 5l1-2h6l1 2"/>',
   passgen:'<rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 1 1 8 0v3"/><circle cx="12" cy="15.5" r="1.5"/>',
-  colorpick:'<path d="M12 2l3 7h7l-5.5 4 2 7L12 16l-6.5 4 2-7L2 9h7z"/>',
-  removedoc:'<path d="M4 4h6l4 4v12H4z"/><path d="M14 4h6v16h-6"/><path d="M2 20l20-16"/>'
+  colorpick:'<path d="M12 2l3 7h7l-5.5 4 2 7L12 16l-6.5 4 2-7L2 9h7z"/>'
 };
 
 /* ---------- TOOLS ---------- */
@@ -473,41 +661,18 @@ const TOOLS = [
   { id:"join", n:"Join Images", d:"Stitch images into one, vertical or horizontal.", acc:"image/*", multi:true, min:2, opt:"join", out:"joined.jpg" },
   { id:"photosheet", n:"Photo Sheet", d:"Fill an A4 sheet with copies of a photo.", acc:"image/*", opt:"ps", out:"photo-sheet.pdf" },
   { id:"base64", n:"Image to Base64", d:"Get Base64 text for an image to use in code.", acc:"image/*", out:"base64.txt" },
-  { id:"qrgen", n:"QR Code Generator", d:"Create a QR code for any URL, text or Wi-Fi.", out:"qr.png", opt:"qrg", noFile:true },
-  { id:"qrscan", n:"QR Code Scanner", d:"Scan a QR code with your camera.", out:"qr.txt", opt:"qrs", noFile:true },
+  { id:"qrgen", n:"QR Generator", d:"Create a QR code for any URL, text or Wi-Fi.", out:"qr.png", opt:"qrg", noFile:true },
+  { id:"qrscan", n:"QR Scanner", d:"Scan a QR code with your camera.", out:"qr.txt", opt:"qrs", noFile:true },
   { id:"heic", n:"HEIC to JPG", d:"Convert iPhone HEIC photos to JPG or PNG.", acc:".heic,.heif,image/*", multi:true, opt:"heic", out:"image" },
   { id:"passgen", n:"Password Generator", d:"Create strong random passwords.", out:"password.txt", opt:"pg", noFile:true },
   { id:"colorpick", n:"Colour Picker", d:"Pick colours from an image and get HEX codes.", acc:"image/*", opt:"cp", out:"colours.txt" }
 ];
 
-/* ---------- I18N ---------- */
-const LANG = {
-  en: {
-    badge:"Files never leave your device",
-    kicker:"100% in-browser · no uploads",
-    h1a:"Every PDF & image job, ",h1b:"finished in seconds.",
-    lead:"Merge, split, sign, OCR, compress, convert — right in your browser. Nothing gets uploaded. Nothing gets stored.",
-    search:"Search 30+ tools…",
-    allTools:"All tools", count:n=>`${n} tools available`,
-    t1b:"No uploads, ever", t1s:"Everything runs on your device. Private files stay private.",
-    t2b:"Instant processing", t2s:"No queues, no waiting. Results as fast as your device.",
-    t3b:"Free, no sign-up", t3s:"Pick a tool, add files, download. No account needed.",
-    choose:"Choose files", ordrop:"or drag and drop them here",
-    process:"Process", working:"Working…", done:"Done", download:"Download",
-    noMatch:"No tool matches your search.",
-    skipped:"Some files were skipped (wrong type).",
-    badRead:"This file could not be read. It may be damaged or password-protected.",
-    wrongPw:"Password is missing or wrong.",
-    enterPw:"Enter a password.",
-    copy:"Copy", copied:"Copied!"
-  }
-};
-const t = k => LANG.en[k];
-
 /* ---------- FIELD HELPERS ---------- */
 const fld = (id,l,ph="",type="text") => `<div><label for="${id}">${l}</label><input id="${id}" type="${type}" placeholder="${ph}"></div>`;
 const sel = (id,l,o) => `<div><label for="${id}">${l}</label><select id="${id}">${o.map(x=>`<option value="${x[0]}">${x[1]}</option>`).join("")}</select></div>`;
 const txt = (id,l,ph="") => `<div><label for="${id}">${l}</label><textarea id="${id}" placeholder="${ph}"></textarea></div>`;
+const chk = (id,l,checked=true) => `<label class="chk" for="${id}"><input type="checkbox" id="${id}" ${checked?"checked":""}>${l}</label>`;
 
 const OPTS = () => ({
   range: fld("o1","Pages (in the order you want)","1-3, 5, 8-10"),
@@ -525,13 +690,13 @@ const OPTS = () => ({
   ps: `<div class="row2">${fld("o1","Photo width in cm","3.5","number")}${fld("o2","Photo height in cm","4.5","number")}</div>` + fld("o3","Gap in mm","2","number"),
   prot: fld("o1","Password to open the PDF","","password") + fld("o2","Owner password (optional)","","password") + sel("o3","Printing",[["1","Allowed"],["0","Not allowed"]]),
   pw: fld("o1","PDF password (leave blank for owner-locked files)","","password"),
-  ocr: sel("o1","Language",[["eng","English"],["hin","Hindi"],["eng+hin","English + Hindi"],["ara","Arabic"],["spa","Spanish"],["fra","French"],["deu","German"],["chi_sim","Chinese (Simplified)"],["jpn","Japanese"],["rus","Russian"]]) + sel("o2","Input type",[["auto","Auto-detect"],["pdf","Scanned PDF"],["img","Image"]]) + sel("o3","Output",[["txt","Plain text"],["pdf","Searchable PDF (image + text layer)"]],),
-  sign: `<div><label>Draw your signature below</label><div class="sigbox"><canvas id="sigpad"></canvas></div></div>` + `<div class="row2">${fld("o1","Page number (blank = last)","","number")}${sel("o2","Position",[["bl","Bottom left"],["br","Bottom right"],["c","Centre"]])}</div>` + `<div class="row2">${fld("o3","Width (in points)","160","number")}${fld("o4","Height (in points)","60","number")}</div>` + fld("o5","Signer name (optional)") ,
-  qrg: txt("o1","Content (URL, text, Wi-Fi, email…)","https://example.com") + sel("o2","Type",[["text","Text / URL"],["wifi","Wi-Fi"],["email","Email"],["phone","Phone"]]) + `<div class="row2">${fld("o3","Wi-Fi SSID (for Wi-Fi only)")}${fld("o4","Wi-Fi password")}</div>` + sel("o5","Size",[[256,"Small 256px"],[512,"Medium 512px"],[1024,"Large 1024px"]]) + sel("o6","Colour",[["#000000","Black"],["#2F5BFF","Blue"],["#12B76A","Green"],["#8B5CF6","Purple"]]) + `<div class="qrbox" id="qrprev"></div>`,
-  qrs: `<div><label>Camera preview</label><div class="scanner" id="scanner"><video id="cam" playsinline muted></video></div></div>` + `<p style="color:var(--mut);font-size:.85rem;margin-top:10px;text-align:center">Point your camera at a QR code. It scans automatically.</p>`,
+  ocr: sel("o1","Language",[["eng","English"],["hin","Hindi"],["eng+hin","English + Hindi"],["ara","Arabic"],["spa","Spanish"],["fra","French"],["deu","German"],["chi_sim","Chinese (Simplified)"],["jpn","Japanese"],["rus","Russian"]]) + sel("o2","Input type",[["auto","Auto-detect"],["pdf","Scanned PDF"],["img","Image"]]) + sel("o3","Output",[["txt","Plain text"],["pdf","Searchable PDF (image + text layer)"]]),
+  sign: `<div><label>Draw your signature below</label><div class="sigbox"><canvas id="sigpad"></canvas></div></div>` + `<div class="row2">${fld("o1","Page number (blank = last)","","number")}${sel("o2","Position",[["bl","Bottom left"],["br","Bottom right"],["c","Centre"]])}</div>` + `<div class="row2">${fld("o3","Width (in points)","160","number")}${fld("o4","Height (in points)","60","number")}</div>` + fld("o5","Signer name (optional)"),
+  qrg: txt("o1","Content (URL, text, Wi-Fi, email…)","https://example.com") + sel("o2","Type",[["text","Text / URL"],["wifi","Wi-Fi"],["email","Email"],["phone","Phone"]]) + `<div class="row2">${fld("o3","Wi-Fi SSID (for Wi-Fi only)")}${fld("o4","Wi-Fi password")}</div>` + sel("o5","Size",[[256,"Small 256px"],[512,"Medium 512px"],[1024,"Large 1024px"]]) + sel("o6","Colour",[["#000000","Black"],["#C6F135","Lime"],["#2F5BFF","Blue"],["#12B76A","Green"],["#8B5CF6","Purple"]]) + `<div class="qrbox" id="qrprev"></div>`,
+  qrs: `<div><label>Camera preview</label><div class="scanner" id="scanner"><video id="cam" playsinline muted></video></div></div>` + `<p style="color:var(--ink3);font-size:.78rem;margin-top:10px;text-align:center;font-family:var(--mono)">Point your camera at a QR code</p>`,
   heic: sel("o1","Output format",[["jpeg","JPG"],["png","PNG"]]) + sel("o2","Quality",[[.92,"High"],[.8,"Medium"],[.6,"Small"]]),
-  pg: fld("o1","Password length","20","number") + `<div class="row2"><div><label><input type="checkbox" id="o2" checked style="width:auto;margin-right:8px">Include uppercase</label></div><div><label><input type="checkbox" id="o3" checked style="width:auto;margin-right:8px">Include numbers</label></div></div><div class="row2"><div><label><input type="checkbox" id="o4" checked style="width:auto;margin-right:8px">Include symbols</label></div><div><label><input type="checkbox" id="o5" style="width:auto;margin-right:8px">Exclude ambiguous (0/O, l/1)</label></div></div>`,
-  cp: `<div><label>Click the image to pick a colour</label><div style="margin-top:10px;border-radius:14px;overflow:hidden;border:1px solid var(--line);background:var(--soft)"><img id="cpimg" style="display:block;max-width:100%;cursor:crosshair"></div></div><div class="row2">${fld("o1","HEX","#2F5BFF")}${fld("o2","RGB","47, 91, 255")}</div><div id="swatches" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px"></div>`
+  pg: fld("o1","Password length","20","number") + chk("o2","Include uppercase") + chk("o3","Include numbers") + chk("o4","Include symbols") + chk("o5","Exclude ambiguous (0/O, l/1)",false),
+  cp: `<div><label>Click the image to pick a colour</label><div class="cpimg"><img id="cpimg"></div></div><div class="row2">${fld("o1","HEX","#C6F135")}${fld("o2","RGB","198, 241, 53")}</div><div class="swatches" id="swatches"></div>`
 });
 
 /* ---------- STATE ---------- */
@@ -540,18 +705,60 @@ let tool = null, files = [], url = null, extra = {};
 
 /* ---------- INIT ---------- */
 $("yr").textContent = new Date().getFullYear();
+const svgIcon = id => `<svg viewBox="0 0 24 24">${ICONS[id] || ICONS.merge}</svg>`;
+
 const renderGrid = () => {
   const q = ($("q").value || "").trim().toLowerCase();
   const list = TOOLS.filter(t => (t.n+" "+t.d).toLowerCase().includes(q));
-  $("grid").innerHTML = list.map(t =>
-    `<button class="tile" data-id="${t.id}">
-      <div class="arr"><svg viewBox="0 0 24 24"><path d="M7 17L17 7M9 7h8v8"/></svg></div>
+  $("grid").innerHTML = list.map((t,i) =>
+    `<button class="tile" style="--i:${i}" data-id="${t.id}">
+      <span class="num">${String(i+1).padStart(2,"0")}</span>
+      <div class="ic">${svgIcon(t.id)}</div>
+      <div>
+        <h3>${t.n}</h3>
+        <p>${t.d}</p>
+      </div>
+      <span class="arrow"><svg viewBox="0 0 24 24"><path d="M7 17L17 7M9 7h8v8"/></svg></span>
+    </button>`).join("") || `<p class="empty">No tool matches your search.</p>`;
+  $("count").textContent = `${list.length} of ${TOOLS.length}`;
+};
+
+/* ---------- TOOLBAR ---------- */
+const TABS = [
+  ["All","all"],["PDF","pdf"],["Image","img"],["Convert","conv"],["Utility","util"]
+];
+const TAG = {
+  pdf:["merge","split","rotate","compress","watermark","pagenum","unlock","protect","pdf2txt","splitall","croppdf","pdfinfo","reverse","gray","a4","sign"],
+  img:["imgstudio","imgwm","join","photosheet","colorpick","base64","heic"],
+  conv:["img2pdf","pdf2jpg","ocr"],
+  util:["qrgen","qrscan","passgen"]
+};
+const catOf = id => Object.keys(TAG).find(k => TAG[k].includes(id)) || "util";
+let activeCat = "all";
+function renderToolbar() {
+  $("toolbar").innerHTML = TABS.map(([label,key]) => {
+    const n = key === "all" ? TOOLS.length : (TAG[key]||[]).length;
+    return `<button class="tab" data-cat="${key}" ${activeCat===key?'data-active':''}>${label}<span class="n">${String(n).padStart(2,"0")}</span></button>`;
+  }).join("");
+}
+$("toolbar").onclick = e => { const b = e.target.closest(".tab"); if (!b) return; activeCat = b.dataset.cat; renderToolbar(); renderGrid(); };
+const _renderGrid = renderGrid;
+renderGrid = function() {
+  const q = ($("q").value||"").trim().toLowerCase();
+  const list = TOOLS.filter(t => {
+    if (activeCat !== "all" && catOf(t.id) !== activeCat) return false;
+    return (t.n+" "+t.d).toLowerCase().includes(q);
+  });
+  $("grid").innerHTML = list.map((t,i) =>
+    `<button class="tile" style="--i:${i}" data-id="${t.id}">
+      <span class="num">${String(i+1).padStart(2,"0")}</span>
       <div class="ic">${svgIcon(t.id)}</div>
       <div><h3>${t.n}</h3><p>${t.d}</p></div>
-    </button>`).join("") || `<p class="empty">${t("noMatch")}</p>`;
-  $("count").textContent = t("count")(list.length);
+      <span class="arrow"><svg viewBox="0 0 24 24"><path d="M7 17L17 7M9 7h8v8"/></svg></span>
+    </button>`).join("") || `<p class="empty">No tool matches your search.</p>`;
+  $("count").textContent = `${list.length} of ${TOOLS.length}`;
 };
-const svgIcon = id => `<svg viewBox="0 0 24 24">${ICONS[id] || ICONS.merge}</svg>`;
+renderToolbar();
 
 /* ---------- OPEN TOOL ---------- */
 function openTool(id) {
@@ -567,16 +774,15 @@ function openTool(id) {
   $("drop").style.display = tool.noFile ? "none" : "";
   $("msg").textContent = ""; $("msg").className = "msg";
   $("res").innerHTML = ""; $("list").innerHTML = "";
-  $("go").disabled = true;
+  $("go").disabled = !tool.noFile;
   $("go").classList.remove("busy");
-  $("go").textContent = tool.noFile ? "Generate" : t("process");
+  $("go").textContent = tool.noFile ? "Generate" : "Process";
   $("dlg").showModal();
   initExtras();
-  if (tool.noFile) $("go").disabled = false;
 }
 
-/* ---------- DROP ZONE ---------- */
-$("drop").innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></svg><b>'+t("choose")+'</b><span>'+t("ordrop")+'</span>';
+/* ---------- DROP ---------- */
+$("drop").innerHTML = '<div class="up"><svg viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></svg></div><b>Choose files</b><span>or drag and drop them here</span>';
 const drop = $("drop");
 drop.onclick = () => $("inp").click();
 drop.onkeydown = e => { if (e.key==="Enter"||e.key===" ") { e.preventDefault(); $("inp").click(); } };
@@ -592,18 +798,18 @@ function add(list) {
     if (acc.startsWith(".")) return acc.split(",").some(a => f.name.toLowerCase().endsWith(a.trim()));
     return true;
   });
-  if (ok.length < list.length) say(t("skipped"), true);
+  if (ok.length < list.length) say("Some files were skipped (wrong type).", true);
   files = tool.multi ? files.concat(ok) : ok.slice(0,1);
   render();
 }
 
-/* ---------- FILE LIST ---------- */
 const buf = f => f.arrayBuffer();
 const size = b => b > 1048576 ? (b/1048576).toFixed(1)+" MB" : Math.max(1,Math.round(b/1024))+" KB";
 function render() {
   $("list").innerHTML = files.map((f,i) =>
-    `<li>
-      <div class="nm">${f.name.replace(/[<&]/g,"")}</div>
+    `<li style="animation-delay:${i*30}ms">
+      <span class="th">${(f.name.split(".").pop()||"").toUpperCase().slice(0,3)}</span>
+      <span class="nm">${f.name.replace(/[<&]/g,"")}</span>
       <small>${size(f.size)}</small>
       ${tool.multi && files.length>1 ? `<button data-a="up" data-i="${i}" aria-label="Move up"><svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>` : ""}
       <button data-a="rm" data-i="${i}" aria-label="Remove"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
@@ -645,22 +851,20 @@ function ranges(str, max) {
   return set;
 }
 
-/* ---------- EXTRAS (QR, Signature, Scanner, Colour) ---------- */
+/* ---------- EXTRAS ---------- */
 function initExtras() {
   if (tool.opt === "sign") initSignature();
   if (tool.opt === "qrs") initScanner();
   if (tool.opt === "qrg") initQRPreview();
   if (tool.opt === "cp") initColourPicker();
 }
-
-/* Signature */
 function initSignature() {
   const cv = $("sigpad"); if (!cv) return;
   const dpr = window.devicePixelRatio || 1;
   const rect = cv.getBoundingClientRect();
   cv.width = rect.width * dpr; cv.height = rect.height * dpr;
   const ctx = cv.getContext("2d"); ctx.scale(dpr, dpr);
-  ctx.lineWidth = 2.5; ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.strokeStyle = "#0B1220";
+  ctx.lineWidth = 2.5; ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.strokeStyle = "#0A0A0A";
   let drawing = false, hasInk = false;
   const pos = e => { const r = cv.getBoundingClientRect(); const p = e.touches ? e.touches[0] : e; return { x: p.clientX - r.left, y: p.clientY - r.top }; };
   const start = e => { e.preventDefault(); drawing = true; hasInk = true; const p = pos(e); ctx.beginPath(); ctx.moveTo(p.x,p.y); };
@@ -673,8 +877,6 @@ function initSignature() {
   extra.sigHasInk = () => hasInk;
   extra.sigCanvas = cv;
 }
-
-/* QR Preview */
 function initQRPreview() {
   const box = $("qrprev"); if (!box) return;
   const update = () => {
@@ -682,23 +884,16 @@ function initQRPreview() {
     const size = +($("o5")?.value || 256);
     const color = $("o6")?.value || "#000000";
     let data = $("o1")?.value || "";
-    if (type === "wifi") {
-      const ssid = $("o3")?.value || "", pw = $("o4")?.value || "";
-      data = `WIFI:T:WPA;S:${ssid};P:${pw};;`;
-    } else if (type === "email") data = "mailto:" + data;
+    if (type === "wifi") data = `WIFI:T:WPA;S:${$("o3")?.value||""};P:${$("o4")?.value||""};;`;
+    else if (type === "email") data = "mailto:" + data;
     else if (type === "phone") data = "tel:" + data;
     if (!data) data = " ";
     box.innerHTML = "";
-    try {
-      const q = new QRCode(box, { text: data, width: size, height: size, colorDark: color, colorLight: "#ffffff", correctLevel: QRCode.CorrectLevel.M });
-      extra.qrNode = box;
-    } catch (e) { box.innerHTML = '<p style="color:var(--mut);font-size:.85rem">Could not generate QR.</p>'; }
+    try { new QRCode(box, { text: data, width: size, height: size, colorDark: color, colorLight: "#ffffff", correctLevel: QRCode.CorrectLevel.M }); } catch (e) {}
   };
   ["o1","o2","o3","o4","o5","o6"].forEach(id => { const el = $(id); if (el) el.addEventListener("input", update); });
   update();
 }
-
-/* QR Scanner */
 async function initScanner() {
   const video = $("cam"); if (!video) return;
   const canvas = document.createElement("canvas");
@@ -718,10 +913,10 @@ async function initScanner() {
       if (code) {
         found = true;
         extra.qrResult = code.data;
-        say("QR found: " + code.data.slice(0,60), false);
+        say("QR found · " + code.data.slice(0,50), false);
         $("msg").className = "msg ok";
         $("res").innerHTML = `<a href="#" id="dlqr"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>Download text</a>`;
-        $("dlqr").onclick = e => { e.preventDefault(); const b = new Blob([code.data], {type:"text/plain"}); const a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = "qr.txt"; a.click(); };
+        $("dlqr").onclick = e => { e.preventDefault(); const b = new Blob([code.data],{type:"text/plain"}); const a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = "qr.txt"; a.click(); };
       }
     }
     raf = requestAnimationFrame(tick);
@@ -730,8 +925,6 @@ async function initScanner() {
   extra.stopScanner = () => { if (raf) cancelAnimationFrame(raf); if (stream) stream.getTracks().forEach(t=>t.stop()); };
 }
 $("dlg").addEventListener("close", () => { if (extra.stopScanner) extra.stopScanner(); });
-
-/* Colour Picker */
 function initColourPicker() {
   const img = $("cpimg"); if (!img) return;
   const c = document.createElement("canvas");
@@ -739,12 +932,9 @@ function initColourPicker() {
   const picked = new Set();
   const update = () => {
     if (!files[0]) return;
-    const f = files[0], u = URL.createObjectURL(f);
+    const u = URL.createObjectURL(files[0]);
     img.src = u;
-    img.onload = () => {
-      c.width = img.naturalWidth; c.height = img.naturalHeight;
-      c.getContext("2d").drawImage(img, 0, 0);
-    };
+    img.onload = () => { c.width = img.naturalWidth; c.height = img.naturalHeight; c.getContext("2d").drawImage(img, 0, 0); };
   };
   img.onclick = e => {
     if (!c.width) return;
@@ -752,21 +942,19 @@ function initColourPicker() {
     const x = Math.round((e.clientX - r.left) / r.width * c.width);
     const y = Math.round((e.clientY - r.top) / r.height * c.height);
     const d = c.getContext("2d").getImageData(x, y, 1, 1).data;
-    const hex = "#" + [d[0],d[1],d[2]].map(v=>v.toString(16).padStart(2,"0")).join("");
+    const hex = "#" + [d[0],d[1],d[2]].map(v=>v.toString(16).padStart(2,"0")).join("").toUpperCase();
     const rv = `${d[0]}, ${d[1]}, ${d[2]}`;
-    $("o1").value = hex.toUpperCase(); $("o2").value = rv;
-    picked.add(hex.toUpperCase() + " " + rv);
+    $("o1").value = hex; $("o2").value = rv;
+    picked.add(hex + "|" + rv);
     sw.innerHTML = [...picked].map(p => {
-      const [h, rgbv] = p.split(" ");
-      return `<div title="${p}" style="width:32px;height:32px;border-radius:8px;background:${h};border:1px solid var(--line);cursor:pointer" data-c="${h} ${rgbv}"></div>`;
+      const [h, rgbv] = p.split("|");
+      return `<div class="swatch" style="background:${h}" data-c="${p}" title="${h}"></div>`;
     }).join("");
   };
-  sw.onclick = e => { const b = e.target.closest("[data-c]"); if (b) { const [h,rgbv] = b.dataset.c.split(" "); $("o1").value = h; $("o2").value = rgbv; } };
+  sw.onclick = e => { const b = e.target.closest(".swatch"); if (b) { const [h,rgbv] = b.dataset.c.split("|"); $("o1").value = h; $("o2").value = rgbv; } };
   extra.refreshColour = update;
   update();
 }
-
-/* Override render to refresh colour picker */
 const _render = render;
 render = function() { _render(); if (extra.refreshColour) extra.refreshColour(); };
 
@@ -830,7 +1018,7 @@ const RUN = {
   },
   async protect() {
     const up = $("o1").value, op = $("o2").value || up + "-owner";
-    if (!up) throw new Error(t("enterPw"));
+    if (!up) throw new Error("Enter a password.");
     const L = await esm("https://cdn.jsdelivr.net/npm/pdf-lib-plus-encrypt@1.1.0/+esm");
     const d = await L.PDFDocument.load(await buf(files[0]));
     await d.encrypt({ userPassword:up, ownerPassword:op, permissions:{ printing: $("o3").value==="1"?"highResolution":false, modifying:false, copying:false, annotating:false, fillingForms:true, contentAccessibility:true, documentAssembly:false } });
@@ -966,12 +1154,12 @@ const RUN = {
     return pack(res);
   },
   async ocr() {
-    const lang = $("o1").value, inp = $("o2").value, out = $("o3").value;
+    const lang = $("o1").value, out = $("o3").value;
     say("Loading OCR engine…");
     const worker = await Tesseract.createWorker(lang, 1, { logger: m => { if (m.status === "recognizing text") say(`OCR ${Math.round(m.progress*100)}%…`); } });
     const pages = [];
     if (files[0].type === "application/pdf" || /\.pdf$/i.test(files[0].name)) {
-      await renderPages(files[0], 2, async (c, n) => pages.push(c));
+      await renderPages(files[0], 2, async (c) => pages.push(c));
     } else {
       const bm = await createImageBitmap(files[0]), c = document.createElement("canvas");
       c.width = bm.width; c.height = bm.height; c.getContext("2d").drawImage(bm,0,0);
@@ -985,7 +1173,7 @@ const RUN = {
     }
     await worker.terminate();
     if (out === "pdf") {
-      const pdf = await PDFDocument.create(), font = await pdf.embedFont(StandardFonts.Helvetica);
+      const pdf = await PDFDocument.create();
       for (let i=0;i<pages.length;i++) {
         const img = await pdf.embedJpg(await (await toBlob(pages[i], .9)).arrayBuffer());
         const p = pdf.addPage([img.width, img.height]);
@@ -1006,7 +1194,7 @@ const RUN = {
     const page = pages[Math.min(Math.max(pn,1), pages.length) - 1];
     const pos = $("o2").value;
     const W = +$("o3").value || 160, H = +$("o4").value || 60;
-    const pw = page.getWidth(), phh = page.getHeight();
+    const pw = page.getWidth();
     const x = pos === "bl" ? 40 : pos === "br" ? pw - W - 40 : (pw - W)/2;
     const y = 40;
     page.drawImage(sig, { x, y, width: W, height: H });
@@ -1020,10 +1208,8 @@ const RUN = {
   async qrgen() {
     const type = $("o2").value;
     let data = $("o1").value;
-    if (type === "wifi") {
-      const ssid = $("o3").value, pw = $("o4").value;
-      data = `WIFI:T:WPA;S:${ssid};P:${pw};;`;
-    } else if (type === "email") data = "mailto:" + data;
+    if (type === "wifi") data = `WIFI:T:WPA;S:${$("o3").value};P:${$("o4").value};;`;
+    else if (type === "email") data = "mailto:" + data;
     else if (type === "phone") data = "tel:" + data;
     if (!data) throw new Error("Enter some content first.");
     const size = +$("o5").value, color = $("o6").value;
@@ -1067,11 +1253,9 @@ const RUN = {
     return new Blob([pw], { type:"text/plain" });
   },
   async colorpick() {
-    const hex = $("o1").value, rv = $("o2").value;
-    return new Blob([`HEX: ${hex}\nRGB: ${rv}`], { type:"text/plain" });
+    return new Blob([`HEX: ${$("o1").value}\nRGB: ${$("o2").value}`], { type:"text/plain" });
   }
 };
-
 function pack(res) {
   if (res.length === 1) { extra.outName = res[0].name; return res[0].blob; }
   const z = new JSZip(); res.forEach(r => z.file(r.name, r.blob)); extra.outName = "images.zip";
@@ -1115,35 +1299,29 @@ async function procImg(f) {
 $("go").onclick = async () => {
   extra.outName = "";
   $("go").disabled = true; $("go").classList.add("busy");
-  say(t("working"));
+  say("Working…");
   try {
     const blob = await RUN[tool.id]();
     if (url) URL.revokeObjectURL(url);
     url = URL.createObjectURL(blob);
     const fn = extra.outName || tool.out;
-    say(t("done") + " " + size(blob.size), false);
+    say("Done · " + size(blob.size), false);
     $("msg").className = "msg ok";
-    $("res").innerHTML = `<a href="${url}" download="${fn}"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>${t("download")} ${fn}</a>`;
+    $("res").innerHTML = `<a href="${url}" download="${fn}"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>Download ${fn}</a>`;
   } catch (e) {
-    const m = e.name === "PasswordException" ? t("wrongPw") : (e.message && !/Failed to parse|Invalid PDF|encrypted/i.test(e.message) ? e.message : t("badRead"));
+    const m = e.name === "PasswordException" ? "Password is missing or wrong." : (e.message && !/Failed to parse|Invalid PDF|encrypted/i.test(e.message) ? e.message : "This file could not be read. It may be damaged or password-protected.");
     say(m, true);
   }
   $("go").classList.remove("busy");
   $("go").disabled = tool.noFile ? false : files.length < (tool.min||1);
 };
 
-/* ---------- MARQUEE ---------- */
-const CHIPS = [["Merge PDF","merge"],["Sign PDF","sign"],["OCR","ocr"],["PDF to JPG","pdf2jpg"],["Compress","compress"],["QR Code","qrgen"],["Split","split"],["Watermark","watermark"],["HEIC to JPG","heic"],["Unlock","unlock"],["PDF to text","pdf2txt"],["Split to ZIP","splitall"],["Page numbers","pagenum"],["Rotate","rotate"],["Crop PDF","croppdf"],["Passport photo","photosheet"],["Join images","join"],["Watermark image","imgwm"],["Grayscale","gray"],["A4 resize","a4"],["Image to Base64","base64"],["Password gen","passgen"],["Colour picker","colorpick"],["QR Scanner","qrscan"]];
-const chipHtml = CHIPS.map(c => `<button class="chip" data-id="${c[1]}">${c[0]}</button>`).join("");
-$("mq").innerHTML = chipHtml + chipHtml;
-$("mq").onclick = e => { const c = e.target.closest(".chip"); if (c) openTool(c.dataset.id); };
-
 /* ---------- THEME ---------- */
 const root = document.documentElement, mqDark = matchMedia("(prefers-color-scheme: dark)");
 const isDark = () => root.dataset.theme ? root.dataset.theme === "dark" : mqDark.matches;
 const sunIco = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>';
 const moonIco = '<svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
-const paintTheme = () => { $("theme").innerHTML = isDark() ? sunIco : moonIco; };
+const paintTheme = () => { $("theme").innerHTML = (isDark() ? sunIco : moonIco) + (isDark() ? "Light" : "Dark"); };
 try { const t = localStorage.getItem("theme"); if (t) root.dataset.theme = t; } catch (e) {}
 $("theme").onclick = () => { root.dataset.theme = isDark() ? "light" : "dark"; try { localStorage.setItem("theme", root.dataset.theme); } catch (e) {} paintTheme(); };
 mqDark.onchange = paintTheme; paintTheme();
@@ -1155,6 +1333,9 @@ addEventListener("keydown", e => {
   if ((e.ctrlKey||e.metaKey) && e.key === "k") { e.preventDefault(); $("q").focus(); }
   if (e.key === "Escape" && $("dlg").open) $("dlg").close();
 });
+
+/* grid click */
+$("grid").onclick = e => { const b = e.target.closest(".tile"); if (b) openTool(b.dataset.id); };
 
 renderGrid();
 </script>
