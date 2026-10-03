@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>PaperKit – Free PDF tools in your browser</title>
+<title>YourX – Free PDF and image tools in your browser</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%232F5BFF'/%3E%3Cpath d='M10 10l12 12M22 10L10 22' stroke='white' stroke-width='3.5' stroke-linecap='round'/%3E%3C/svg%3E">
 <meta name="description" content="Merge, split, rotate, compress and convert PDFs. Files never leave your device.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&display=swap" rel="stylesheet">
@@ -32,7 +33,7 @@ h1{font-size:clamp(2.4rem,7vw,4.6rem);line-height:1.02;letter-spacing:-.035em;fo
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px;padding-bottom:56px}
 .tile{position:relative;text-align:left;border:0;cursor:pointer;background:var(--c);color:#101828;border-radius:var(--r);padding:26px 24px 24px;min-height:200px;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;transition:transform .2s}
 .tile:hover{transform:translateY(-4px) rotate(-.4deg)}
-.tile::after{content:"";position:absolute;top:0;right:0;width:46px;height:46px;background:linear-gradient(225deg,var(--bg) 50%,rgba(0,0,0,.14) 50%);border-bottom-left-radius:14px}
+.tile::after{content:"";position:absolute;right:-46px;top:-46px;width:150px;height:150px;border-radius:50%;background:rgba(255,255,255,.38);transition:transform .6s cubic-bezier(.2,.8,.2,1)}
 .tile .g{font-size:2.4rem;line-height:1;font-weight:800}
 .tile h3{font-size:1.35rem;letter-spacing:-.02em}
 .tile p{font-size:.95rem;opacity:.8;margin-top:4px}
@@ -105,6 +106,26 @@ li{animation:up .35s backwards}
 .go.busy{background:linear-gradient(90deg,var(--acc),#9FB5FF,var(--acc));background-size:200% 100%;animation:sh 1.1s linear infinite}
 .go.busy:disabled{opacity:1}
 .res a{animation:pop .45s cubic-bezier(.2,1.2,.3,1)}
+.hero>div:first-child>h1{background:linear-gradient(100deg,var(--ink) 35%,var(--acc) 50%,var(--ink) 65%);background-size:250% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:up .9s backwards cubic-bezier(.2,.8,.2,1),shine 5s linear 1s infinite}
+.logo svg{filter:drop-shadow(0 6px 12px rgba(80,90,255,.45));transition:transform .5s}.logo:hover svg{transform:rotate(180deg)}
+.tile:hover{transform:perspective(800px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)) translateY(-4px)}
+.tile:hover::after{transform:scale(1.7)}
+.g svg,.di svg{width:28px;height:28px;transition:transform .4s cubic-bezier(.2,1.4,.4,1)}
+.tile:hover .g svg{transform:rotate(-10deg) scale(1.2)}
+.di{width:54px;height:54px;border-radius:17px;display:grid;place-items:center;flex:none;color:#101828;animation:pop .5s cubic-bezier(.2,1.3,.3,1)}
+.dh>div:nth-child(2){flex:1}
+.drop svg{display:block;margin:0 auto 10px;width:42px;height:42px;stroke:var(--acc);animation:bob 2.4s ease-in-out infinite}
+.go{background:linear-gradient(120deg,var(--acc),color-mix(in srgb,var(--acc) 40%,#c084fc))}
+.glow{position:fixed;left:50%;top:30%;width:560px;height:560px;margin:-280px 0 0 -280px;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--acc) 26%,transparent),transparent 65%);pointer-events:none;z-index:0;transition:left .3s,top .3s}
+.marq{overflow:hidden;margin:0 -20px 30px;-webkit-mask-image:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent);mask-image:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent)}
+.marq div{display:flex;gap:12px;width:max-content;animation:mq 30s linear infinite}
+.marq span{border:1px solid var(--line);background:var(--card);border-radius:99px;padding:8px 20px;font-weight:600;font-size:.9rem;color:var(--mut)}
+header{flex-wrap:nowrap}
+@media(max-width:700px){.badge{display:none}}
+@media(hover:none){.glow{display:none}}
+@keyframes shine{to{background-position:-250% 0}}
+@keyframes bob{50%{transform:translateY(-6px)}}
+@keyframes mq{to{transform:translateX(-50%)}}
 @keyframes up{from{opacity:0;transform:translateY(24px)}}
 @keyframes pop{from{opacity:0;transform:scale(.94) translateY(14px)}}
 @keyframes fade{from{opacity:0}}
@@ -116,9 +137,10 @@ li{animation:up .35s backwards}
 </head>
 <body>
 <div class="bg" aria-hidden="true"><i></i><i></i><i></i></div>
+<div class="glow" id="glow" aria-hidden="true"></div>
 <div class="wrap">
   <header>
-    <div class="logo"><i></i>PaperKit</div>
+    <div class="logo"><svg width="34" height="34" viewBox="0 0 32 32" aria-hidden="true"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2F5BFF"/><stop offset="1" stop-color="#9B5CFF"/></linearGradient></defs><rect width="32" height="32" rx="10" fill="url(#lg)"/><path d="M10 10l12 12M22 10L10 22" stroke="#fff" stroke-width="3.4" stroke-linecap="round"/></svg>YourX</div>
     <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><div class="badge" data-t="badge">100% private · files never leave your device</div><button class="lang" id="theme" aria-label="Toggle dark mode"></button></div>
   </header>
 
@@ -131,6 +153,8 @@ li{animation:up .35s backwards}
     <div class="sheets" aria-hidden="true"><i></i><i></i><i></i></div>
   </section>
 
+  <div class="marq" aria-hidden="true"><div><span>PDF</span><span>JPG</span><span>PNG</span><span>WebP</span><span>ZIP</span><span>TXT</span><span>Merge</span><span>Split</span><span>Compress</span><span>Crop</span><span>DPI</span><span>Watermark</span><span>Unlock</span><span>PDF</span><span>JPG</span><span>PNG</span><span>WebP</span><span>ZIP</span><span>TXT</span><span>Merge</span><span>Split</span><span>Compress</span><span>Crop</span><span>DPI</span><span>Watermark</span><span>Unlock</span></div></div>
+
   <main class="grid" id="grid" aria-label="PDF tools"></main>
 
   <section class="trust">
@@ -139,11 +163,12 @@ li{animation:up .35s backwards}
     <div><b data-t="t3b">No limits</b><span data-t="t3s">Work with as many files as your device can handle.</span></div>
   </section>
 
-  <footer>© <span id="yr"></span> PaperKit. Built with pdf-lib, PDF.js and JSZip.</footer>
+  <footer>© <span id="yr"></span> YourX. All rights reserved.</footer>
 </div>
 
 <dialog id="dlg" aria-labelledby="dt">
   <div class="dh">
+    <div class="di" id="di"></div>
     <div><h2 id="dt"></h2><p id="dd"></p></div>
     <button class="x" id="close" aria-label="Close">✕</button>
   </div>
@@ -176,6 +201,20 @@ const TOOLS = [
   { id:"pdf2txt", g:"¶", n:"PDF to Text", d:"Extract all text from a PDF into a .txt file.", c:"#F3C9B8", acc:".pdf", out:"text.txt" }
 ];
 const lang = "en";
+const P = {
+  merge:'<path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 13l9 5 9-5"/>',
+  split:'<circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4L8.1 15.9M14.5 14.5L20 20M8.1 8.1L12 12"/>',
+  rotate:'<path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/>',
+  compress:'<path d="M4 14h6v6M20 10h-6V4M14 10l7-7M3 21l7-7"/>',
+  imgstudio:'<rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/>',
+  img2pdf:'<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 17l2-3 2 2 2-3"/>',
+  pdf2jpg:'<path d="M12 3v12M7 10l5 5 5-5M5 21h14"/>',
+  watermark:'<path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/>',
+  pagenum:'<path d="M5 9h14M5 15h14M10 3L8 21M16 3l-2 18"/>',
+  unlock:'<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 7.5-2"/>',
+  pdf2txt:'<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/>'
+};
+const ico = id => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${P[id]}</svg>`;
 const b = (e, h) => lang === "hi" ? h : e;
 const nm = t => t.n, ds = t => t.d;
 const fld = (id, l, ph = "", t = "text") => `<label for="${id}">${l}</label><input id="${id}" type="${t}" placeholder="${ph}">`;
@@ -196,13 +235,13 @@ let tool = null, files = [], url = null;
 
 $("yr").textContent = new Date().getFullYear();
 const renderGrid = () => $("grid").innerHTML = TOOLS.filter(t => (t.n + " " + t.d).toLowerCase().includes(($("q").value || "").trim().toLowerCase())).map((t, i) =>
-  `<button class="tile" style="--c:${t.c};--i:${i}" data-id="${t.id}"><span class="g">${t.g}</span><span><h3>${nm(t)}</h3><p>${ds(t)}</p></span></button>`).join("") || `<p class="empty">No tool matches your search.</p>`;
+  `<button class="tile" style="--c:${t.c};--i:${i}" data-id="${t.id}"><span class="g">${ico(t.id)}</span><span><h3>${nm(t)}</h3><p>${ds(t)}</p></span></button>`).join("") || `<p class="empty">No tool matches your search.</p>`;
 $("grid").onclick = e => { const b = e.target.closest(".tile"); if (b) openTool(b.dataset.id); };
 $("close").onclick = () => $("dlg").close();
 
 function openTool(id) {
   tool = TOOLS.find(t => t.id === id); files = [];
-  $("dt").textContent = nm(tool); $("dd").textContent = ds(tool);
+  $("dt").textContent = nm(tool); $("dd").textContent = ds(tool); $("di").innerHTML = ico(tool.id); $("di").style.background = tool.c;
   $("inp").accept = tool.acc; $("inp").multiple = !!tool.multi;
   $("opt").innerHTML = OPTS()[tool.opt] || "";
   reset(); render(); $("dlg").showModal();
@@ -409,9 +448,11 @@ $("go").onclick = async () => {
   }
   $("go").classList.remove("busy"); $("go").disabled = files.length < (tool.min || 1);
 };
-$("drop").innerHTML = "<b>Choose files</b>or drag and drop them here";
+$("drop").innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></svg><b>Choose files</b>or drag and drop them here';
 $("q").oninput = renderGrid;
-$("grid").addEventListener("pointermove", e => { const t = e.target.closest(".tile"); if (!t) return; const r = t.getBoundingClientRect(); t.style.setProperty("--mx", e.clientX - r.left + "px"); t.style.setProperty("--my", e.clientY - r.top + "px"); });
+$("grid").addEventListener("pointermove", e => { const t = e.target.closest(".tile"); if (!t) return; const r = t.getBoundingClientRect(); t.style.setProperty("--mx", e.clientX - r.left + "px"); t.style.setProperty("--my", e.clientY - r.top + "px"); t.style.setProperty("--rx", ((e.clientY - r.top) / r.height - .5) * -9 + "deg"); t.style.setProperty("--ry", ((e.clientX - r.left) / r.width - .5) * 9 + "deg"); });
+$("grid").addEventListener("pointerout", e => { const t = e.target.closest(".tile"); if (t) { t.style.setProperty("--rx", "0deg"); t.style.setProperty("--ry", "0deg"); } });
+addEventListener("pointermove", e => { $("glow").style.left = e.clientX + "px"; $("glow").style.top = e.clientY + "px"; });
 renderGrid();
 const root = document.documentElement, mq = matchMedia("(prefers-color-scheme: dark)");
 const isDark = () => root.dataset.theme ? root.dataset.theme === "dark" : mq.matches;
