@@ -143,7 +143,7 @@ canvas.th{background:#fff}
 .out{margin-top:16px;animation:pop .4s cubic-bezier(.2,1.2,.3,1)}
 .big{font-size:1.55rem;font-weight:800;letter-spacing:-.02em;background:var(--bg);border-radius:16px;padding:16px 18px;line-height:1.25}
 .row{display:flex;justify-content:space-between;gap:14px;padding:11px 4px;border-bottom:1px solid var(--line);font-size:.95rem}
-.row span{color:var(--mut)}.row b{text-align:right}
+.row span{color:var(--mut)}.row b{text-align:right;word-break:break-all}
 .bar{height:10px;border-radius:9px;background:#F6C9E6;overflow:hidden;margin:14px 0 4px}
 .bar i{display:block;height:100%;background:var(--acc);border-radius:9px}
 @keyframes shine{to{background-position:-300% 0}}
@@ -232,6 +232,12 @@ const TOOLS = [
   { id:"gst", n:"GST Calculator", d:"Add or remove GST at any rate, with the CGST and SGST split.", c:"#FFE7A0", calc:true, opt:"gs" },
   { id:"emi", n:"EMI Calculator", d:"Monthly EMI, total interest and total payment for any loan.", c:"#F6C9E6", calc:true, opt:"em" },
   { id:"datediff", n:"Date Difference", d:"Days, weeks, months and working days between two dates.", c:"#C9D5FF", calc:true, opt:"dd" },
+  { id:"ocr", n:"OCR: Image or PDF to Text", d:"Read text from photos and scanned PDFs, including Hindi. Needs internet the first time.", c:"#FFE0B5", acc:"image/*,.pdf", multi:true, opt:"oc", out:"ocr-text.txt" },
+  { id:"wordcount", n:"PDF Word Count", d:"Count words, characters, pages and reading time.", c:"#CFE8D5", acc:".pdf", info:true },
+  { id:"nup", n:"N-up: Pages per Sheet", d:"Put 2, 4 or 6 pages on one sheet to save paper.", c:"#D9D2F5", acc:".pdf", opt:"nu", out:"n-up.pdf" },
+  { id:"headfoot", n:"Header and Footer", d:"Add text at the top and bottom of every page. Use {n} for the page number.", c:"#BDEBF0", acc:".pdf", opt:"hf", out:"header-footer.pdf" },
+  { id:"rmannot", n:"Remove Annotations", d:"Clear comments, highlights and sticky notes from a PDF.", c:"#FFD0C2", acc:".pdf", opt:"ra", out:"clean.pdf" },
+  { id:"hash", n:"File Fingerprint", d:"SHA-256 and SHA-1 checksums to verify any file.", c:"#E4E7B8", acc:"*", info:true },
   { id:"splitall", n:"Split to Pages", d:"Save every page as its own PDF, bundled in one ZIP.", c:"#C2E9FB", acc:".pdf", out:"pages.zip" },
   { id:"croppdf", n:"Crop PDF", d:"Trim margins from every page.", c:"#F9DDA4", acc:".pdf", opt:"crop", out:"cropped.pdf" },
   { id:"pdfinfo", n:"Edit PDF Info", d:"Set title, author and subject, or leave blank to clear them.", c:"#D8D0FF", acc:".pdf", opt:"info", out:"edited.pdf" },
@@ -270,6 +276,12 @@ P.percent = '<path d="M19 5L5 19"/><circle cx="7" cy="7" r="2.5"/><circle cx="17
 P.unit = '<rect x="2" y="8" width="20" height="8" rx="2"/><path d="M6 8v4M10 8v3M14 8v4M18 8v3"/>';
 P.gst = '<path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/>';
 P.emi = '<circle cx="12" cy="12" r="9"/><path d="M9 8h6M9 12h6M9 8c4 0 4 5 0 5l5 3"/>';
+P.ocr = '<path d="M4 7V5a1 1 0 0 1 1-1h2M17 4h2a1 1 0 0 1 1 1v2M20 17v2a1 1 0 0 1-1 1h-2M7 20H5a1 1 0 0 1-1-1v-2M8 9h8M8 12h8M8 15h5"/>';
+P.wordcount = '<path d="M4 6h16M4 10h16M4 14h10M4 18h7"/>';
+P.nup = '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M12 4v16M3 12h18"/>';
+P.headfoot = '<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M4 8h16M4 16h16"/>';
+P.rmannot = '<path d="M4 20l4-1L19 8a2.8 2.8 0 0 0-4-4L4 15z"/><path d="M3 3l18 18"/>';
+P.hash = '<path d="M12 3a7 7 0 0 0-7 7v3M12 7a3 3 0 0 0-3 3v5a6 6 0 0 0 1 3M12 10v4a9 9 0 0 0 2 5M16 10v1a11 11 0 0 1-1 5M19 12v-2a7 7 0 0 0-5-6.7"/>';
 P.reverse = '<path d="M7 4v16M3 16l4 4 4-4M17 20V4M13 8l4-4 4 4"/>';
 P.gray = '<circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/>';
 P.a4 = '<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/>';
@@ -285,7 +297,7 @@ const sel = (id, l, o) => `<label for="${id}">${l}</label><select id="${id}">${o
 const OPTS = () => ({
   range: fld("o1", b("Pages (in the order you want)", "पेज (जिस क्रम में चाहिए)"), "1-3, 5, 8-10"),
   angle: sel("o1", b("Rotation", "घुमाव"), [[90, "90° ↻"], [180, "180°"], [270, "90° ↺"]]),
-  cmp: sel("o1", b("Compression level", "कंप्रेशन लेवल"), [[.6, b("Balanced", "संतुलित")], [.4, b("Strong", "ज़्यादा")], [.8, b("Light", "कम")]]) + fld("o2", b("Target size in KB (optional)", "टारगेट साइज़ KB में (वैकल्पिक)"), "500", "number"),
+  cmp: sel("o1", b("Compression level", "कंप्रेशन लेवल"), [[.7, "Balanced"], [.5, "Strong"], [.85, "Light"], ["keep", "Keep text sharp (small saving)"]]) + fld("o2", b("Target size in KB (optional)", "टारगेट साइज़ KB में (वैकल्पिक)"), "500", "number"),
   img: fld("o1", b("Resolution in pixels (width x height)", "रेज़ोल्यूशन पिक्सल में (चौड़ाई x ऊँचाई)"), "300x250") + fld("o2", b("Crop ratio (width:height)", "क्रॉप रेशियो (चौड़ाई:ऊँचाई)"), "1:1, 4:5") + fld("o3", b("Maximum size in KB", "अधिकतम साइज़ KB"), "40", "number") + fld("o4", b("Minimum size in KB (enlarges the file)", "न्यूनतम साइज़ KB (फाइल बड़ी करता है)"), "30", "number") + fld("o5", "DPI", "300", "number") + sel("o6", "Format", [["jpeg", "JPG"], ["png", "PNG"], ["webp", "WebP"]]) + sel("o7", "Rotate or flip", [["0", "None"], ["90", "Rotate 90° right"], ["180", "Rotate 180°"], ["270", "Rotate 90° left"], ["h", "Flip horizontally"], ["v", "Flip vertically"]]) + sel("o8", "Colour", [["", "Original"], ["grayscale(1)", "Grayscale"], ["grayscale(1) contrast(2.2)", "Black and white"]]),
   wm: fld("o1", b("Watermark text (English letters)", "वॉटरमार्क टेक्स्ट (अंग्रेज़ी अक्षर)"), "CONFIDENTIAL") + sel("o2", b("Strength", "गहराई"), [[.15, b("Light", "हल्का")], [.3, b("Medium", "मध्यम")], [.5, b("Strong", "गहरा")]]),
   pn: sel("o1", b("Position", "स्थान"), [["c", b("Bottom center", "नीचे बीच में")], ["r", b("Bottom right", "नीचे दाएँ")], ["l", b("Bottom left", "नीचे बाएँ")]]) + fld("o2", b("Start from number", "शुरुआती नंबर"), "1", "number"),
@@ -305,6 +317,10 @@ const OPTS = () => ({
   gs: fld("o1", "Amount in ₹", "1000", "number") + sel("o2", "GST rate", [[0, "0%"], [0.25, "0.25%"], [3, "3%"], [5, "5%"], [12, "12%"], [18, "18%"], [28, "28%"]]) + fld("o4", "Custom rate % (optional)", "", "number") + sel("o3", "Mode", [["add", "Add GST to amount"], ["rem", "Remove GST from amount"]]),
   em: fld("o1", "Loan amount in ₹", "500000", "number") + fld("o2", "Interest rate per year (%)", "9", "number") + fld("o3", "Tenure", "5", "number") + sel("o4", "Tenure in", [["y", "Years"], ["m", "Months"]]),
   dd: fld("o1", "From date", "", "date") + fld("o2", "To date", "", "date"),
+  oc: sel("o1", "Language in the document", [["eng", "English"], ["hin", "Hindi"], ["hin+eng", "Hindi + English"]]),
+  nu: sel("o1", "Pages per sheet", [["2,1,841.89,595.28", "2 per sheet"], ["2,2,595.28,841.89", "4 per sheet"], ["3,2,841.89,595.28", "6 per sheet"]]),
+  hf: fld("o1", "Header text", "Company name") + fld("o2", "Footer text", "Page {n} of {total}"),
+  ra: sel("o1", "What to remove", [["all", "Comments, highlights, notes and links"], ["keep", "Comments, highlights and notes (keep links)"]]),
   pw: fld("o1", b("PDF password", "PDF पासवर्ड"), "", "password")
 });
 let outName = "";
@@ -321,7 +337,7 @@ $("close").onclick = () => $("dlg").close();
 function openTool(id) {
   tool = TOOLS.find(t => t.id === id); files = [];
   $("dt").textContent = nm(tool); $("dd").textContent = ds(tool); $("di").innerHTML = ico(tool.id); $("di").style.background = tool.c;
-  $("inp").accept = tool.acc; $("inp").multiple = !!tool.multi;
+  $("inp").accept = tool.acc === "*" ? "" : tool.acc; $("inp").multiple = !!tool.multi;
   $("opt").innerHTML = OPTS()[tool.opt] || ""; if (tool.id === "unit") fillUnits();
   reset(); render(); $("drop").hidden = $("list").hidden = !!tool.calc; if (tool.calc) $("go").textContent = "Calculate"; $("dlg").showModal();
 }
@@ -335,8 +351,9 @@ drop.ondragleave = () => drop.classList.remove("on");
 drop.ondrop = e => { e.preventDefault(); drop.classList.remove("on"); add([...e.dataTransfer.files]); };
 $("inp").onchange = e => { add([...e.target.files]); e.target.value = ""; };
 
+const isPdf = f => /\.pdf$/i.test(f.name) || f.type === "application/pdf";
 function add(list) {
-  const ok = list.filter(f => tool.acc === "image/*" ? f.type.startsWith("image/") : /\.pdf$/i.test(f.name) || f.type === "application/pdf");
+  const ok = list.filter(f => tool.acc === "*" || (tool.acc.includes("image/*") && f.type.startsWith("image/")) || (tool.acc.includes(".pdf") && isPdf(f)));
   if (ok.length < list.length) say(b("Some files were skipped (wrong file type).", "कुछ फाइलें छोड़ दी गईं (गलत फाइल टाइप)।"), true);
   files = tool.multi ? files.concat(ok) : ok.slice(0, 1);
   reset(); render();
@@ -523,8 +540,9 @@ const RUN = {
     return zip.generateAsync({ type: "blob" });
   },
   async compress() {
-    const q0 = +$("o1").value, max = +$("o2").value * 1024, pages = [];
-    await renderPages(files[0], 1.5, async (c, n, vp) => { pages.push([c, vp]); });
+    const keep = $("o1").value === "keep", q0 = keep ? .85 : +$("o1").value, max = +$("o2").value * 1024, pages = [];
+    if (keep && !max) { const d = await PDFDocument.load(await buf(files[0])); return new Blob([await d.save({ useObjectStreams: true })], { type: "application/pdf" }); }
+    await renderPages(files[0], 2, async (c, n, vp) => { pages.push([c, vp]); });
     const build = async q => {
       const out = await PDFDocument.create();
       for (const [c, vp] of pages) {
@@ -573,6 +591,67 @@ const RUN = {
     if (!n) throw new Error("No clickable links were found in this PDF.");
     return new Blob([await d.save()], { type: "application/pdf" });
   },
+  async ocr() {
+    if (!window.Tesseract) await new Promise((ok, no) => { const sc = document.createElement("script"); sc.src = "https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"; sc.onload = ok; sc.onerror = () => no(new Error("Could not load the OCR engine. Check your internet connection and try again.")); document.head.appendChild(sc); });
+    say("Loading the language data…");
+    const w = await Tesseract.createWorker($("o1").value, 1, { logger: m => { if (m.status === "recognizing text") say("Reading text… " + Math.round(m.progress * 100) + "%"); } });
+    let text = "";
+    try {
+      for (const f of files) {
+        text += "=== " + f.name + " ===\n";
+        if (isPdf(f)) await renderPages(f, 2, async (c, n) => { text += `--- Page ${n} ---\n` + (await w.recognize(c)).data.text + "\n"; });
+        else text += (await w.recognize(f)).data.text + "\n";
+      }
+    } finally { await w.terminate(); }
+    return new Blob([text], { type: "text/plain;charset=utf-8" });
+  },
+  async wordcount() {
+    const pdf = await pdfjsLib.getDocument({ data: await buf(files[0]) }).promise; let t = "";
+    for (let n = 1; n <= pdf.numPages; n++) { say(`${n} / ${pdf.numPages}…`); t += (await (await pdf.getPage(n)).getTextContent()).items.map(i => i.str).join(" ") + " "; }
+    const words = (t.match(/\S+/g) || []).length;
+    return big(fmt(words) + " words") + rows([["Pages", pdf.numPages], ["Characters (no spaces)", fmt(t.replace(/\s/g, "").length)], ["Characters (with spaces)", fmt(t.length)], ["Reading time", Math.max(1, Math.round(words / 200)) + " min"]]) + (words ? "" : '<p class="empty">No selectable text was found. This may be a scanned PDF, so try the OCR tool.</p>');
+  },
+  async hash() {
+    const data = await buf(files[0]), hx = async a => [...new Uint8Array(await crypto.subtle.digest(a, data))].map(x => x.toString(16).padStart(2, "0")).join("");
+    return big("Checksums ready") + rows([["File", files[0].name.replace(/[<&]/g, "")], ["Size", size(files[0].size)], ["SHA-256", await hx("SHA-256")], ["SHA-1", await hx("SHA-1")]]);
+  },
+  async nup() {
+    const [c, r, W, H] = $("o1").value.split(",").map(Number), src = await PDFDocument.load(await buf(files[0])), out = await PDFDocument.create(), pgs = src.getPages();
+    const m = 18, cw = (W - m * (c + 1)) / c, ch = (H - m * (r + 1)) / r;
+    for (let i = 0; i < pgs.length; i += c * r) {
+      const pg = out.addPage([W, H]);
+      for (let j = 0; j < c * r && i + j < pgs.length; j++) {
+        const e = await out.embedPage(pgs[i + j]), k = Math.min(cw / e.width, ch / e.height), w = e.width * k, h = e.height * k, col = j % c, row = Math.floor(j / c);
+        pg.drawPage(e, { x: m + col * (cw + m) + (cw - w) / 2, y: H - m - row * (ch + m) - ch + (ch - h) / 2, width: w, height: h });
+      }
+    }
+    return new Blob([await out.save()], { type: "application/pdf" });
+  },
+  async headfoot() {
+    const d = await PDFDocument.load(await buf(files[0])), f = await d.embedFont(PDFLib.StandardFonts.Helvetica), h = $("o1").value, ft = $("o2").value, N = d.getPageCount();
+    if (!h && !ft) throw new Error("Type a header or a footer.");
+    try {
+      d.getPages().forEach((p, i) => {
+        const { width: w, height: ht } = p.getSize();
+        const put = (t, y) => { if (!t) return; t = t.replace(/\{n\}/g, i + 1).replace(/\{total\}/g, N); p.drawText(t, { x: (w - f.widthOfTextAtSize(t, 10)) / 2, y, size: 10, font: f, color: PDFLib.rgb(.25, .25, .3) }); };
+        put(h, ht - 28); put(ft, 18);
+      });
+    } catch (e) { throw new Error("Header and footer support English letters and numbers only."); }
+    return new Blob([await d.save()], { type: "application/pdf" });
+  },
+  async rmannot() {
+    const d = await PDFDocument.load(await buf(files[0])), L = PDFLib, keepL = $("o1").value === "keep"; let n = 0;
+    for (const p of d.getPages()) {
+      const an = p.node.Annots(); if (!an) continue;
+      for (let i = an.size() - 1; i >= 0; i--) {
+        const st = an.lookup(i, L.PDFDict).get(L.PDFName.of("Subtype"));
+        if (st === L.PDFName.of("Widget") || (keepL && st === L.PDFName.of("Link"))) continue;
+        an.remove(i); n++;
+      }
+    }
+    if (!n) throw new Error("No annotations were found in this PDF.");
+    return new Blob([await d.save()], { type: "application/pdf" });
+  },
   async protect() {
     const up = $("o1").value, op = $("o2").value || up + "-owner";
     if (!up) throw new Error("Enter a password.");
@@ -588,8 +667,8 @@ const RUN = {
       return new Blob([await d.save()], { type: "application/pdf" });
     } catch (e) { /* fall back to rebuilding pages as images */ }
     const out = await PDFDocument.create();
-    await renderPages(files[0], 2, async (c, n, vp) => {
-      const img = await out.embedJpg(await (await toBlob(c, .92)).arrayBuffer());
+    await renderPages(files[0], 2.2, async (c, n, vp) => {
+      const img = await out.embedJpg(await (await toBlob(c, .94)).arrayBuffer());
       out.addPage([vp.width, vp.height]).drawImage(img, { x: 0, y: 0, width: vp.width, height: vp.height });
     }, $("o1").value);
     return new Blob([await out.save()], { type: "application/pdf" });
@@ -631,10 +710,10 @@ const RUN = {
   },
   async gray() {
     const out = await PDFDocument.create();
-    await renderPages(files[0], 1.6, async (c, n, vp) => {
+    await renderPages(files[0], 2.2, async (c, n, vp) => {
       const g = document.createElement("canvas"); g.width = c.width; g.height = c.height;
       const x = g.getContext("2d"); x.filter = "grayscale(1)"; x.drawImage(c, 0, 0);
-      const img = await out.embedJpg(await (await toBlob(g, .85)).arrayBuffer());
+      const img = await out.embedJpg(await (await toBlob(g, .93)).arrayBuffer());
       out.addPage([vp.width, vp.height]).drawImage(img, { x: 0, y: 0, width: vp.width, height: vp.height });
     });
     return new Blob([await out.save()], { type: "application/pdf" });
@@ -736,7 +815,7 @@ async function procImg(f) {
   if ($("o1").value.trim() && !m) throw new Error(b("Resolution must look like 300x250", "रेज़ोल्यूशन ऐसा लिखें: 300x250"));
   if (m) { W = +m[1]; H = +m[2]; }
   const fmt = $("o6").value, mime = "image/" + fmt, max = +$("o3").value * 1024, min = +$("o4").value * 1024, dpi = +$("o5").value;
-  const draw = k => { const c = document.createElement("canvas"); c.width = Math.max(1, Math.round(W * k)); c.height = Math.max(1, Math.round(H * k)); const x = c.getContext("2d"); x.fillStyle = "#fff"; x.fillRect(0, 0, c.width, c.height); x.filter = $("o8").value || "none"; x.drawImage(bm, sx, sy, sw, sh, 0, 0, c.width, c.height); return c; };
+  const draw = k => { const c = document.createElement("canvas"); c.width = Math.max(1, Math.round(W * k)); c.height = Math.max(1, Math.round(H * k)); const x = c.getContext("2d"); x.fillStyle = "#fff"; x.fillRect(0, 0, c.width, c.height); x.imageSmoothingQuality = "high"; x.filter = $("o8").value || "none"; x.drawImage(bm, sx, sy, sw, sh, 0, 0, c.width, c.height); return c; };
   let k = 1, best = null;
   if (!max || fmt === "png") best = await toBlob(draw(1), .92, mime);
   else for (;;) {
@@ -755,7 +834,7 @@ $("go").onclick = async () => {
   reset(); $("go").disabled = true; $("go").classList.add("busy"); say(b("Working…", "प्रोसेस हो रहा है…"));
   try {
     const blob = await RUN[tool.id]();
-    if (tool.calc) { say(""); $("res").innerHTML = `<div class="out">${blob}</div>`; $("go").classList.remove("busy"); $("go").disabled = false; return; }
+    if (tool.calc || tool.info) { say(""); $("res").innerHTML = `<div class="out">${blob}</div>`; $("go").classList.remove("busy"); $("go").disabled = false; return; }
     url = URL.createObjectURL(blob);
     const fn = outName || tool.out;
     say(b("Done. ", "हो गया। ") + size(files.reduce((a, f) => a + f.size, 0)) + " → " + size(blob.size));
@@ -768,7 +847,7 @@ $("go").onclick = async () => {
 $("drop").innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></svg><b>Choose files</b>or drag and drop them here';
 $("q").oninput = renderGrid;
 $("opt").onchange = e => { if (tool && tool.id === "unit" && e.target.id === "o1") fillUnits(); };
-const CHIPS = [["Merge PDF","merge"],["PDF to JPG","pdf2jpg"],["Compress","compress"],["Crop image","imgstudio"],["Split","split"],["PNG / WebP","imgstudio"],["Watermark","watermark"],["DPI changer","imgstudio"],["Unlock","unlock"],["PDF to text","pdf2txt"],["Split to ZIP","splitall"],["Page numbers","pagenum"],["Rotate","rotate"],["Crop PDF","croppdf"],["Resize image","imgstudio"],["PDF info","pdfinfo"],["Protect PDF","protect"],["Add link","addlink"],["Remove links","rmlink"],["Age calculator","age"],["EMI calculator","emi"],["GST calculator","gst"],["Percentage","percent"],["Unit converter","unit"],["Date difference","datediff"],["PDF dark mode","dark"],["Reverse pages","reverse"],["Passport photo sheet","photosheet"],["Join images","join"],["Watermark image","imgwm"],["Grayscale PDF","gray"],["A4 resize","a4"],["Image to Base64","base64"]];
+const CHIPS = [["Merge PDF","merge"],["PDF to JPG","pdf2jpg"],["Compress","compress"],["Crop image","imgstudio"],["Split","split"],["PNG / WebP","imgstudio"],["Watermark","watermark"],["DPI changer","imgstudio"],["Unlock","unlock"],["PDF to text","pdf2txt"],["Split to ZIP","splitall"],["Page numbers","pagenum"],["Rotate","rotate"],["Crop PDF","croppdf"],["Resize image","imgstudio"],["PDF info","pdfinfo"],["Protect PDF","protect"],["Add link","addlink"],["Remove links","rmlink"],["Age calculator","age"],["EMI calculator","emi"],["GST calculator","gst"],["Percentage","percent"],["Unit converter","unit"],["Date difference","datediff"],["PDF dark mode","dark"],["OCR","ocr"],["Word count","wordcount"],["N-up","nup"],["Header and footer","headfoot"],["Remove annotations","rmannot"],["File fingerprint","hash"],["Reverse pages","reverse"],["Passport photo sheet","photosheet"],["Join images","join"],["Watermark image","imgwm"],["Grayscale PDF","gray"],["A4 resize","a4"],["Image to Base64","base64"]];
 const chipHtml = CHIPS.map(c => `<button class="chip" data-id="${c[1]}">${c[0]}</button>`).join("");
 $("mq").innerHTML = chipHtml + chipHtml;
 $("mq").onclick = e => { const c = e.target.closest(".chip"); if (c) openTool(c.dataset.id); };
