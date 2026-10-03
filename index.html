@@ -12,7 +12,10 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
 :root{--bg:#EDF1F7;--ink:#101828;--mut:#5B6577;--card:#fff;--line:#D6DCE8;--acc:#2F5BFF;--r:22px}
-@media(prefers-color-scheme:dark){:root{--bg:#0E1424;--ink:#EEF2FF;--mut:#9AA6C0;--card:#171F36;--line:#2A3556;--acc:#7C9BFF}}
+:root{--onacc:#fff;color-scheme:light}
+:root[data-theme=dark]{--bg:#0E1424;--ink:#EEF2FF;--mut:#9AA6C0;--card:#171F36;--line:#2A3556;--acc:#7C9BFF;--onacc:#0E1424;color-scheme:dark}
+:root[data-theme=dark] .bg i{opacity:.22}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0E1424;--ink:#EEF2FF;--mut:#9AA6C0;--card:#171F36;--line:#2A3556;--acc:#7C9BFF;--onacc:#0E1424;color-scheme:dark}:root:not([data-theme=light]) .bg i{opacity:.22}}
 *{box-sizing:border-box;margin:0}
 body{font-family:"Bricolage Grotesque",system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased}
 a,button,input,select{font:inherit;color:inherit}
@@ -22,6 +25,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:20p
 .logo{font-weight:800;font-size:1.35rem;letter-spacing:-.02em;display:flex;align-items:center;gap:10px}
 .logo i{width:30px;height:30px;border-radius:9px 9px 9px 2px;background:var(--acc);display:inline-block}
 .badge{font-size:.85rem;color:var(--mut);border:1px solid var(--line);border-radius:99px;padding:6px 14px}
+.lang{border:1px solid var(--line);background:none;border-radius:99px;padding:6px 16px;cursor:pointer;font-weight:600}.opt label{margin-top:8px}
 .hero{padding:48px 0 36px;max-width:760px}
 h1{font-size:clamp(2.4rem,7vw,4.6rem);line-height:1.02;letter-spacing:-.035em;font-weight:800}
 .hero p{margin-top:18px;font-size:1.15rem;color:var(--mut);max-width:560px}
@@ -62,27 +66,77 @@ li button:hover{background:var(--line)}
 .msg{margin-top:14px;font-size:.95rem;min-height:1.4em}
 .err{color:#D92D20}
 .res a{display:block;text-align:center;text-decoration:none;margin-top:12px;background:#12B76A;color:#fff;border-radius:16px;padding:15px;font-weight:700}
-@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+
+body,.tile,.trust div,dialog,.badge,.lang,.search,li,.opt input,.opt select{transition:background-color .4s,color .4s,border-color .4s}
+.wrap{position:relative;z-index:1}
+.bg{position:fixed;inset:0;overflow:hidden;z-index:0;pointer-events:none}
+.bg i{position:absolute;width:46vmax;height:46vmax;border-radius:50%;filter:blur(90px);opacity:.45;animation:drift 22s ease-in-out infinite alternate}
+.bg i:nth-child(1){background:#7C9BFF;top:-15vmax;left:-10vmax}
+.bg i:nth-child(2){background:#FFB4A2;right:-15vmax;top:10vmax;animation-delay:-8s}
+.bg i:nth-child(3){background:#A8E6E0;bottom:-20vmax;left:25vw;animation-delay:-15s}
+header{position:sticky;top:0;z-index:5;margin:0 -20px;padding:14px 20px;backdrop-filter:blur(16px);background:color-mix(in srgb,var(--bg) 65%,transparent)}
+.hero{display:flex;align-items:center;justify-content:space-between;gap:30px;max-width:none}
+.hero>div:first-child{max-width:700px}
+.hero>div:first-child>*{animation:up .9s backwards cubic-bezier(.2,.8,.2,1)}
+.hero>div:first-child>:nth-child(2){animation-delay:.12s}.hero>div:first-child>:nth-child(3){animation-delay:.24s}
+.search{margin-top:26px;width:100%;max-width:460px;border:1px solid var(--line);background:var(--card);border-radius:99px;padding:14px 22px;font-size:1rem}
+.sheets{position:relative;width:270px;height:250px;flex:none}
+.sheets i{position:absolute;width:150px;height:200px;border-radius:16px;background:var(--card);border:1px solid var(--line);border-top:12px solid var(--tc);box-shadow:0 24px 40px -20px rgba(16,24,40,.45);transform:rotate(var(--rot));animation:float 7s ease-in-out infinite}
+.sheets i::before{content:"";position:absolute;inset:16px 16px auto;height:120px;background:repeating-linear-gradient(var(--line) 0 5px,transparent 5px 15px);border-radius:4px}
+.sheets i:nth-child(1){left:0;top:34px;--rot:-9deg;--tc:#B8E0FF}
+.sheets i:nth-child(2){left:52px;top:8px;--rot:3deg;--tc:#FFE69A;animation-delay:-2.5s}
+.sheets i:nth-child(3){left:112px;top:38px;--rot:12deg;--tc:#FFB4A2;animation-delay:-5s}
+@media(max-width:820px){.sheets{display:none}}
+.tile{animation:up .7s backwards cubic-bezier(.2,.8,.2,1);animation-delay:calc(var(--i)*60ms + 250ms);transition:transform .35s cubic-bezier(.2,.8,.2,1),box-shadow .35s}
+.tile>*{position:relative}
+.tile::before{content:"";position:absolute;inset:0;background:radial-gradient(260px circle at var(--mx,50%) var(--my,50%),rgba(255,255,255,.6),transparent 60%);opacity:0;transition:opacity .3s}
+.tile:hover{box-shadow:0 22px 40px -22px rgba(16,24,40,.55)}
+.tile:hover::before{opacity:1}
+.tile:active{transform:scale(.98)}
+.tile .g{width:54px;height:54px;border-radius:16px;background:rgba(255,255,255,.55);display:grid;place-items:center;font-size:1.7rem}
+.empty{color:var(--mut);padding:20px 0}
+.trust div{opacity:0;transform:translateY(26px);transition:opacity .7s,transform .7s cubic-bezier(.2,.8,.2,1),background-color .4s,border-color .4s}
+.trust div.in{opacity:1;transform:none}
+dialog[open]{animation:pop .4s cubic-bezier(.2,1.1,.3,1)}
+dialog[open]::backdrop{animation:fade .3s}
+li{animation:up .35s backwards}
+.go{color:var(--onacc);transition:transform .2s,filter .2s}
+.go:not(:disabled):hover{filter:brightness(1.08);transform:translateY(-2px)}
+.go.busy{background:linear-gradient(90deg,var(--acc),#9FB5FF,var(--acc));background-size:200% 100%;animation:sh 1.1s linear infinite}
+.go.busy:disabled{opacity:1}
+.res a{animation:pop .45s cubic-bezier(.2,1.2,.3,1)}
+@keyframes up{from{opacity:0;transform:translateY(24px)}}
+@keyframes pop{from{opacity:0;transform:scale(.94) translateY(14px)}}
+@keyframes fade{from{opacity:0}}
+@keyframes sh{to{background-position:-200% 0}}
+@keyframes drift{to{transform:translate(8vmax,6vmax) scale(1.15)}}
+@keyframes float{50%{transform:translateY(-14px) rotate(var(--rot))}}
+@media(prefers-reduced-motion:reduce){*,::before,::after{animation:none!important;transition:none!important}.trust div{opacity:1;transform:none}}
 </style>
 </head>
 <body>
+<div class="bg" aria-hidden="true"><i></i><i></i><i></i></div>
 <div class="wrap">
   <header>
     <div class="logo"><i></i>PaperKit</div>
-    <div class="badge">100% private · works offline after load</div>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><div class="badge" data-t="badge">100% private · files never leave your device</div><button class="lang" id="theme" aria-label="Toggle dark mode"></button></div>
   </header>
 
   <section class="hero">
-    <h1>Every PDF job, finished in seconds.</h1>
-    <p>Merge, split, rotate, compress and convert. Your files are processed inside your browser and never uploaded.</p>
+    <div>
+      <h1>Every PDF job, finished in seconds.</h1>
+      <p>Merge, split, compress, convert and edit PDFs and images. Everything runs in your browser and nothing is uploaded.</p>
+      <input class="search" id="q" type="search" placeholder="Search tools: compress, crop, watermark…" aria-label="Search tools">
+    </div>
+    <div class="sheets" aria-hidden="true"><i></i><i></i><i></i></div>
   </section>
 
   <main class="grid" id="grid" aria-label="PDF tools"></main>
 
   <section class="trust">
-    <div><b>No uploads</b><span>Everything runs on your device, so private files stay private.</span></div>
-    <div><b>No sign-up</b><span>Pick a tool, add files, download the result.</span></div>
-    <div><b>No limits</b><span>Work with as many files as your device can handle.</span></div>
+    <div><b data-t="t1b">No uploads</b><span data-t="t1s">Everything runs on your device, so private files stay private.</span></div>
+    <div><b data-t="t2b">No sign-up</b><span data-t="t2s">Pick a tool, add files, download the result.</span></div>
+    <div><b data-t="t3b">No limits</b><span data-t="t3s">Work with as many files as your device can handle.</span></div>
   </section>
 
   <footer>© <span id="yr"></span> PaperKit. Built with pdf-lib, PDF.js and JSZip.</footer>
@@ -94,9 +148,7 @@ li button:hover{background:var(--line)}
     <button class="x" id="close" aria-label="Close">✕</button>
   </div>
   <div class="db">
-    <div class="drop" id="drop" tabindex="0" role="button">
-      <b>Choose files</b>or drag and drop them here
-    </div>
+    <div class="drop" id="drop" tabindex="0" role="button"></div>
     <input type="file" id="inp" hidden>
     <ul id="list"></ul>
     <div class="opt" id="opt"></div>
@@ -112,35 +164,50 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs
 
 const TOOLS = [
   { id:"merge", g:"⊕", n:"Merge PDF", d:"Combine several PDFs into one, in the order you choose.", c:"#FFB4A2", acc:".pdf", multi:true, min:2, out:"merged.pdf" },
-  { id:"split", g:"✂", n:"Split PDF", d:"Extract the pages you need, for example 1-3, 5, 8-10.", c:"#B8E0FF", acc:".pdf", opt:"range", out:"extracted.pdf" },
+  { id:"split", g:"✂", n:"Split & Reorder PDF", d:"Keep, delete or reorder pages, for example 1-3, 5 or 3,1,2.", c:"#B8E0FF", acc:".pdf", opt:"range", out:"extracted.pdf" },
   { id:"rotate", g:"↻", n:"Rotate PDF", d:"Turn every page clockwise or counter-clockwise.", c:"#C7F2C4", acc:".pdf", opt:"angle", out:"rotated.pdf" },
-  { id:"img2pdf", g:"▣", n:"Images to PDF", d:"Turn JPG, PNG or WebP images into one PDF.", c:"#FFE69A", acc:"image/*", multi:true, out:"images.pdf" },
+  { id:"compress", g:"⤓", n:"Compress PDF", d:"Shrink a PDF, or enter the exact size you need in KB. Text becomes an image.", c:"#FFC9E8", acc:".pdf", opt:"cmp", out:"compressed.pdf" },
+  { id:"imgstudio", g:"◩", n:"Image Studio", d:"Compress or enlarge file size, set resolution, crop, change DPI and format.", c:"#FFE69A", acc:"image/*", multi:true, opt:"img", out:"image" },
+  { id:"img2pdf", g:"▣", n:"Images to PDF", d:"Turn JPG, PNG or WebP images into one PDF.", c:"#D4F0A8", acc:"image/*", multi:true, out:"images.pdf" },
   { id:"pdf2jpg", g:"⇩", n:"PDF to JPG", d:"Save every page as a sharp JPG image.", c:"#E3C7FF", acc:".pdf", out:"pages.zip" },
-  { id:"compress", g:"⤓", n:"Compress PDF", d:"Shrink large PDFs. Pages become images, so text is no longer selectable.", c:"#FFC9E8", acc:".pdf", opt:"quality", out:"compressed.pdf" }
+  { id:"watermark", g:"✎", n:"Watermark PDF", d:"Stamp diagonal text across every page.", c:"#FFD3A5", acc:".pdf", opt:"wm", out:"watermarked.pdf" },
+  { id:"pagenum", g:"#", n:"Page Numbers", d:"Add page numbers to every page.", c:"#A8E6E0", acc:".pdf", opt:"pn", out:"numbered.pdf" },
+  { id:"unlock", g:"⚿", n:"Unlock PDF", d:"Remove a password you know. Pages are rebuilt as images, so text is no longer selectable.", c:"#C9CCFF", acc:".pdf", opt:"pw", out:"unlocked.pdf" },
+  { id:"pdf2txt", g:"¶", n:"PDF to Text", d:"Extract all text from a PDF into a .txt file.", c:"#F3C9B8", acc:".pdf", out:"text.txt" }
 ];
+const lang = "en";
+const b = (e, h) => lang === "hi" ? h : e;
+const nm = t => t.n, ds = t => t.d;
+const fld = (id, l, ph = "", t = "text") => `<label for="${id}">${l}</label><input id="${id}" type="${t}" placeholder="${ph}">`;
+const sel = (id, l, o) => `<label for="${id}">${l}</label><select id="${id}">${o.map(x => `<option value="${x[0]}">${x[1]}</option>`).join("")}</select>`;
+const OPTS = () => ({
+  range: fld("o1", b("Pages (in the order you want)", "पेज (जिस क्रम में चाहिए)"), "1-3, 5, 8-10"),
+  angle: sel("o1", b("Rotation", "घुमाव"), [[90, "90° ↻"], [180, "180°"], [270, "90° ↺"]]),
+  cmp: sel("o1", b("Compression level", "कंप्रेशन लेवल"), [[.6, b("Balanced", "संतुलित")], [.4, b("Strong", "ज़्यादा")], [.8, b("Light", "कम")]]) + fld("o2", b("Target size in KB (optional)", "टारगेट साइज़ KB में (वैकल्पिक)"), "500", "number"),
+  img: fld("o1", b("Resolution in pixels (width x height)", "रेज़ोल्यूशन पिक्सल में (चौड़ाई x ऊँचाई)"), "300x250") + fld("o2", b("Crop ratio (width:height)", "क्रॉप रेशियो (चौड़ाई:ऊँचाई)"), "1:1, 4:5") + fld("o3", b("Maximum size in KB", "अधिकतम साइज़ KB"), "40", "number") + fld("o4", b("Minimum size in KB (enlarges the file)", "न्यूनतम साइज़ KB (फाइल बड़ी करता है)"), "30", "number") + fld("o5", "DPI", "300", "number") + sel("o6", b("Format", "फॉर्मेट"), [["jpeg", "JPG"], ["png", "PNG"], ["webp", "WebP"]]),
+  wm: fld("o1", b("Watermark text (English letters)", "वॉटरमार्क टेक्स्ट (अंग्रेज़ी अक्षर)"), "CONFIDENTIAL") + sel("o2", b("Strength", "गहराई"), [[.15, b("Light", "हल्का")], [.3, b("Medium", "मध्यम")], [.5, b("Strong", "गहरा")]]),
+  pn: sel("o1", b("Position", "स्थान"), [["c", b("Bottom center", "नीचे बीच में")], ["r", b("Bottom right", "नीचे दाएँ")], ["l", b("Bottom left", "नीचे बाएँ")]]) + fld("o2", b("Start from number", "शुरुआती नंबर"), "1", "number"),
+  pw: fld("o1", b("PDF password", "PDF पासवर्ड"), "", "password")
+});
+let outName = "";
 
 const $ = id => document.getElementById(id);
 let tool = null, files = [], url = null;
 
 $("yr").textContent = new Date().getFullYear();
-$("grid").innerHTML = TOOLS.map(t =>
-  `<button class="tile" style="--c:${t.c}" data-id="${t.id}"><span class="g">${t.g}</span><span><h3>${t.n}</h3><p>${t.d}</p></span></button>`).join("");
+const renderGrid = () => $("grid").innerHTML = TOOLS.filter(t => (t.n + " " + t.d).toLowerCase().includes(($("q").value || "").trim().toLowerCase())).map((t, i) =>
+  `<button class="tile" style="--c:${t.c};--i:${i}" data-id="${t.id}"><span class="g">${t.g}</span><span><h3>${nm(t)}</h3><p>${ds(t)}</p></span></button>`).join("") || `<p class="empty">No tool matches your search.</p>`;
 $("grid").onclick = e => { const b = e.target.closest(".tile"); if (b) openTool(b.dataset.id); };
 $("close").onclick = () => $("dlg").close();
 
 function openTool(id) {
   tool = TOOLS.find(t => t.id === id); files = [];
-  $("dt").textContent = tool.n; $("dd").textContent = tool.d;
+  $("dt").textContent = nm(tool); $("dd").textContent = ds(tool);
   $("inp").accept = tool.acc; $("inp").multiple = !!tool.multi;
-  const o = {
-    range: `<label for="o1">Pages to keep</label><input id="o1" placeholder="e.g. 1-3, 5, 8-10">`,
-    angle: `<label for="o1">Rotation</label><select id="o1"><option value="90">90° clockwise</option><option value="180">180°</option><option value="270">90° counter-clockwise</option></select>`,
-    quality: `<label for="o1">Compression level</label><select id="o1"><option value="0.6">Balanced</option><option value="0.4">Strong</option><option value="0.8">Light</option></select>`
-  };
-  $("opt").innerHTML = o[tool.opt] || "";
+  $("opt").innerHTML = OPTS()[tool.opt] || "";
   reset(); render(); $("dlg").showModal();
 }
-function reset() { $("msg").textContent = ""; $("msg").className = "msg"; $("res").innerHTML = ""; if (url) URL.revokeObjectURL(url); }
+function reset() { outName = ""; $("msg").textContent = ""; $("msg").className = "msg"; $("res").innerHTML = ""; if (url) URL.revokeObjectURL(url); }
 
 const drop = $("drop");
 drop.onclick = () => $("inp").click();
@@ -151,8 +218,8 @@ drop.ondrop = e => { e.preventDefault(); drop.classList.remove("on"); add([...e.
 $("inp").onchange = e => { add([...e.target.files]); e.target.value = ""; };
 
 function add(list) {
-  const ok = list.filter(f => tool.id === "img2pdf" ? f.type.startsWith("image/") : /\.pdf$/i.test(f.name) || f.type === "application/pdf");
-  if (ok.length < list.length) say("Some files were skipped because they are not " + (tool.id === "img2pdf" ? "images." : "PDFs."), true);
+  const ok = list.filter(f => tool.acc === "image/*" ? f.type.startsWith("image/") : /\.pdf$/i.test(f.name) || f.type === "application/pdf");
+  if (ok.length < list.length) say(b("Some files were skipped (wrong file type).", "कुछ फाइलें छोड़ दी गईं (गलत फाइल टाइप)।"), true);
   files = tool.multi ? files.concat(ok) : ok.slice(0, 1);
   reset(); render();
 }
@@ -163,7 +230,7 @@ function render() {
     (tool.multi && files.length > 1 ? `<button data-a="up" data-i="${i}" aria-label="Move up">↑</button>` : "") +
     `<button data-a="rm" data-i="${i}" aria-label="Remove">✕</button></li>`).join("");
   $("go").disabled = files.length < (tool.min || 1);
-  $("go").textContent = tool.n.replace(" PDF", "") + (tool.id === "merge" || tool.id === "img2pdf" ? " now" : " now");
+  $("go").textContent = b(nm(tool).replace(/ PDF| &.*/, "") + " now", "शुरू करें");
 }
 $("list").onclick = e => {
   const b = e.target.closest("button"); if (!b) return;
@@ -187,9 +254,9 @@ function ranges(str, max) {
   return set;
 }
 const buf = f => f.arrayBuffer();
-const toBlob = (c, q) => new Promise(r => c.toBlob(r, "image/jpeg", q));
-async function renderPages(file, scale, cb) {
-  const pdf = await pdfjsLib.getDocument({ data: await buf(file) }).promise;
+const toBlob = (c, q, m = "image/jpeg") => new Promise(r => c.toBlob(r, m, q));
+async function renderPages(file, scale, cb, pw) {
+  const pdf = await pdfjsLib.getDocument({ data: await buf(file), password: pw }).promise;
   for (let n = 1; n <= pdf.numPages; n++) {
     say(`Processing page ${n} of ${pdf.numPages}…`);
     const pg = await pdf.getPage(n), vp = pg.getViewport({ scale });
@@ -242,28 +309,118 @@ const RUN = {
     return zip.generateAsync({ type: "blob" });
   },
   async compress() {
-    const out = await PDFDocument.create(), q = +$("o1").value;
-    await renderPages(files[0], 1.5, async (c, n, vp1) => {
-      const img = await out.embedJpg(await (await toBlob(c, q)).arrayBuffer());
-      out.addPage([vp1.width, vp1.height]).drawImage(img, { x: 0, y: 0, width: vp1.width, height: vp1.height });
-    });
+    const q0 = +$("o1").value, max = +$("o2").value * 1024, pages = [];
+    await renderPages(files[0], 1.5, async (c, n, vp) => { pages.push([c, vp]); });
+    const build = async q => {
+      const out = await PDFDocument.create();
+      for (const [c, vp] of pages) {
+        const img = await out.embedJpg(await (await toBlob(c, q)).arrayBuffer());
+        out.addPage([vp.width, vp.height]).drawImage(img, { x: 0, y: 0, width: vp.width, height: vp.height });
+      }
+      return new Blob([await out.save()], { type: "application/pdf" });
+    };
+    if (!max) return build(q0);
+    let lo = .05, hi = .9, best = null;
+    for (let i = 0; i < 6; i++) { say(b("Fitting to size…", "साइज़ में फिट कर रहे हैं…")); const q = (lo + hi) / 2, r = await build(q); if (r.size <= max) { best = r; lo = q; } else hi = q; }
+    return best || build(.05);
+  },
+  async unlock() {
+    const out = await PDFDocument.create();
+    await renderPages(files[0], 2, async (c, n, vp) => {
+      const img = await out.embedJpg(await (await toBlob(c, .92)).arrayBuffer());
+      out.addPage([vp.width, vp.height]).drawImage(img, { x: 0, y: 0, width: vp.width, height: vp.height });
+    }, $("o1").value);
     return new Blob([await out.save()], { type: "application/pdf" });
+  },
+  async pdf2txt() {
+    const pdf = await pdfjsLib.getDocument({ data: await buf(files[0]) }).promise;
+    let t = "";
+    for (let n = 1; n <= pdf.numPages; n++) {
+      say(`${n} / ${pdf.numPages}…`);
+      const tc = await (await pdf.getPage(n)).getTextContent();
+      t += `--- Page ${n} ---\n` + tc.items.map(i => i.str + (i.hasEOL ? "\n" : " ")).join("") + "\n\n";
+    }
+    return new Blob([t], { type: "text/plain;charset=utf-8" });
+  },
+  async watermark() {
+    const d = await PDFDocument.load(await buf(files[0])), f = await d.embedFont(PDFLib.StandardFonts.HelveticaBold);
+    const txt = $("o1").value.trim() || "CONFIDENTIAL", op = +$("o2").value;
+    try {
+      d.getPages().forEach(p => {
+        const { width: w, height: h } = p.getSize(), sz = Math.min(w, h) / (txt.length > 12 ? 11 : 8), tw = f.widthOfTextAtSize(txt, sz), k = Math.SQRT1_2;
+        p.drawText(txt, { x: w / 2 - tw / 2 * k + sz / 3 * k, y: h / 2 - tw / 2 * k - sz / 3 * k, size: sz, font: f, rotate: degrees(45), opacity: op, color: PDFLib.rgb(.45, .45, .5) });
+      });
+    } catch (e) { throw new Error(b("Watermark supports English letters and numbers only.", "वॉटरमार्क में सिर्फ अंग्रेज़ी अक्षर और अंक चलते हैं।")); }
+    return new Blob([await d.save()], { type: "application/pdf" });
+  },
+  async pagenum() {
+    const d = await PDFDocument.load(await buf(files[0])), f = await d.embedFont(PDFLib.StandardFonts.Helvetica);
+    const pos = $("o1").value, st = parseInt($("o2").value) || 1;
+    d.getPages().forEach((p, i) => {
+      const w = p.getWidth(), t = String(st + i), tw = f.widthOfTextAtSize(t, 11);
+      p.drawText(t, { x: pos === "c" ? (w - tw) / 2 : pos === "r" ? w - 30 - tw : 30, y: 20, size: 11, font: f, color: PDFLib.rgb(.2, .2, .25) });
+    });
+    return new Blob([await d.save()], { type: "application/pdf" });
+  },
+  async imgstudio() {
+    const res = [];
+    for (const f of files) { say(f.name + "…"); res.push(await procImg(f)); }
+    if (res.length === 1) { outName = res[0].name; return res[0].blob; }
+    const z = new JSZip(); res.forEach(r => z.file(r.name, r.blob)); outName = "images.zip";
+    return z.generateAsync({ type: "blob" });
   }
 };
+async function procImg(f) {
+  const bm = await createImageBitmap(f);
+  let sx = 0, sy = 0, sw = bm.width, sh = bm.height;
+  const cr = $("o2").value.match(/^\s*(\d+(?:\.\d+)?)\s*[:x]\s*(\d+(?:\.\d+)?)\s*$/i);
+  if ($("o2").value.trim() && !cr) throw new Error(b("Crop ratio must look like 4:5", "क्रॉप रेशियो ऐसा लिखें: 4:5"));
+  if (cr) { const r = cr[1] / cr[2]; if (sw / sh > r) { const w = sh * r; sx = (sw - w) / 2; sw = w; } else { const h = sw / r; sy = (sh - h) / 2; sh = h; } }
+  let W = Math.round(sw), H = Math.round(sh);
+  const m = $("o1").value.match(/^\s*(\d+)\s*[x×*]\s*(\d+)\s*$/i);
+  if ($("o1").value.trim() && !m) throw new Error(b("Resolution must look like 300x250", "रेज़ोल्यूशन ऐसा लिखें: 300x250"));
+  if (m) { W = +m[1]; H = +m[2]; }
+  const fmt = $("o6").value, mime = "image/" + fmt, max = +$("o3").value * 1024, min = +$("o4").value * 1024, dpi = +$("o5").value;
+  const draw = k => { const c = document.createElement("canvas"); c.width = Math.max(1, Math.round(W * k)); c.height = Math.max(1, Math.round(H * k)); const x = c.getContext("2d"); x.fillStyle = "#fff"; x.fillRect(0, 0, c.width, c.height); x.drawImage(bm, sx, sy, sw, sh, 0, 0, c.width, c.height); return c; };
+  let k = 1, best = null;
+  if (!max || fmt === "png") best = await toBlob(draw(1), .92, mime);
+  else for (;;) {
+    const cv = draw(k); let lo = .05, hi = .95; best = null;
+    for (let i = 0; i < 7; i++) { const q = (lo + hi) / 2, r = await toBlob(cv, q, mime); if (r.size <= max) { best = r; lo = q; } else hi = q; }
+    if (best || k < .2) break; k *= .85;
+  }
+  if (!best) best = await toBlob(draw(k), .05, mime);
+  let bytes = new Uint8Array(await best.arrayBuffer());
+  if (dpi > 0 && fmt === "jpeg" && bytes[2] === 255 && bytes[3] === 224) { bytes[13] = 1; bytes[14] = dpi >> 8; bytes[15] = dpi & 255; bytes[16] = dpi >> 8; bytes[17] = dpi & 255; }
+  if (min && bytes.length < min) { const p = new Uint8Array(min); p.set(bytes); bytes = p; }
+  return { blob: new Blob([bytes], { type: mime }), name: f.name.replace(/\.[^.]+$/, "") + "." + (fmt === "jpeg" ? "jpg" : fmt) };
+}
 
 $("go").onclick = async () => {
-  reset(); $("go").disabled = true; say("Working…");
+  reset(); $("go").disabled = true; $("go").classList.add("busy"); say(b("Working…", "प्रोसेस हो रहा है…"));
   try {
     const blob = await RUN[tool.id]();
     url = URL.createObjectURL(blob);
-    const before = files.reduce((s, f) => s + f.size, 0);
-    say(`Done. ${size(before)} → ${size(blob.size)}`);
-    $("res").innerHTML = `<a href="${url}" download="${tool.out}">Download ${tool.out}</a>`;
+    const fn = outName || tool.out;
+    say(b("Done. ", "हो गया। ") + size(files.reduce((a, f) => a + f.size, 0)) + " → " + size(blob.size));
+    $("res").innerHTML = `<a href="${url}" download="${fn}">${b("Download", "डाउनलोड करें")} ${fn}</a>`;
   } catch (e) {
-    say(e.message && !/Failed to parse|encrypted/i.test(e.message) ? e.message : "This file could not be read. It may be damaged or password-protected.", true);
+    say(e.name === "PasswordException" ? b("Password is missing or wrong.", "पासवर्ड गायब या गलत है।") : e.message && !/Failed to parse|Invalid PDF|encrypted/i.test(e.message) ? e.message : b("This file could not be read. It may be damaged or password-protected (try Unlock PDF).", "यह फाइल पढ़ी नहीं जा सकी। वह खराब या पासवर्ड वाली हो सकती है (PDF अनलॉक आज़माएं)।"), true);
   }
-  $("go").disabled = files.length < (tool.min || 1);
+  $("go").classList.remove("busy"); $("go").disabled = files.length < (tool.min || 1);
 };
+$("drop").innerHTML = "<b>Choose files</b>or drag and drop them here";
+$("q").oninput = renderGrid;
+$("grid").addEventListener("pointermove", e => { const t = e.target.closest(".tile"); if (!t) return; const r = t.getBoundingClientRect(); t.style.setProperty("--mx", e.clientX - r.left + "px"); t.style.setProperty("--my", e.clientY - r.top + "px"); });
+renderGrid();
+const root = document.documentElement, mq = matchMedia("(prefers-color-scheme: dark)");
+const isDark = () => root.dataset.theme ? root.dataset.theme === "dark" : mq.matches;
+const paintTheme = () => { $("theme").textContent = isDark() ? "☀ Light" : "☾ Dark"; };
+try { const t = localStorage.getItem("theme"); if (t) root.dataset.theme = t; } catch (e) {}
+$("theme").onclick = () => { root.dataset.theme = isDark() ? "light" : "dark"; try { localStorage.setItem("theme", root.dataset.theme); } catch (e) {} paintTheme(); };
+mq.onchange = paintTheme; paintTheme();
+const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }), { threshold: .2 });
+document.querySelectorAll(".trust div").forEach((d, i) => { d.style.transitionDelay = i * 120 + "ms"; io.observe(d); });
 </script>
 </body>
 </html>
