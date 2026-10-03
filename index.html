@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PaperKit – Free PDF tools in your browser</title>
+<meta name="description" content="Merge, split, rotate, compress and convert PDFs. Files never leave your device.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+:root{--bg:#EDF1F7;--ink:#101828;--mut:#5B6577;--card:#fff;--line:#D6DCE8;--acc:#2F5BFF;--r:22px}
+@media(prefers-color-scheme:dark){:root{--bg:#0E1424;--ink:#EEF2FF;--mut:#9AA6C0;--card:#171F36;--line:#2A3556;--acc:#7C9BFF}}
+*{box-sizing:border-box;margin:0}
+body{font-family:"Bricolage Grotesque",system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased}
+a,button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--acc);outline-offset:3px}
+.wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+header{display:flex;align-items:center;justify-content:space-between;padding:20px 0}
+.logo{font-weight:800;font-size:1.35rem;letter-spacing:-.02em;display:flex;align-items:center;gap:10px}
+.logo i{width:30px;height:30px;border-radius:9px 9px 9px 2px;background:var(--acc);display:inline-block}
+.badge{font-size:.85rem;color:var(--mut);border:1px solid var(--line);border-radius:99px;padding:6px 14px}
+.hero{padding:48px 0 36px;max-width:760px}
+h1{font-size:clamp(2.4rem,7vw,4.6rem);line-height:1.02;letter-spacing:-.035em;font-weight:800}
+.hero p{margin-top:18px;font-size:1.15rem;color:var(--mut);max-width:560px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px;padding-bottom:56px}
+.tile{position:relative;text-align:left;border:0;cursor:pointer;background:var(--c);color:#101828;border-radius:var(--r);padding:26px 24px 24px;min-height:200px;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;transition:transform .2s}
+.tile:hover{transform:translateY(-4px) rotate(-.4deg)}
+.tile::after{content:"";position:absolute;top:0;right:0;width:46px;height:46px;background:linear-gradient(225deg,var(--bg) 50%,rgba(0,0,0,.14) 50%);border-bottom-left-radius:14px}
+.tile .g{font-size:2.4rem;line-height:1;font-weight:800}
+.tile h3{font-size:1.35rem;letter-spacing:-.02em}
+.tile p{font-size:.95rem;opacity:.8;margin-top:4px}
+.trust{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;padding:0 0 56px}
+.trust div{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:22px}
+.trust b{display:block;font-size:1.05rem;margin-bottom:4px}
+.trust span{color:var(--mut);font-size:.95rem}
+footer{border-top:1px solid var(--line);padding:24px 0 40px;color:var(--mut);font-size:.9rem}
+dialog{border:0;border-radius:28px;padding:0;width:min(640px,calc(100% - 24px));background:var(--card);color:var(--ink);max-height:92vh;overflow:auto}
+dialog::backdrop{background:rgba(8,12,24,.6);backdrop-filter:blur(4px)}
+.dh{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:26px 26px 0}
+.dh h2{font-size:1.7rem;letter-spacing:-.02em}
+.dh p{color:var(--mut);font-size:.95rem}
+.x{border:1px solid var(--line);background:none;border-radius:50%;width:38px;height:38px;cursor:pointer;font-size:1.1rem;flex:none}
+.db{padding:20px 26px 26px}
+.drop{border:2px dashed var(--line);border-radius:20px;padding:34px 16px;text-align:center;cursor:pointer;color:var(--mut);transition:.15s}
+.drop.on,.drop:hover{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 8%,transparent);color:var(--ink)}
+.drop b{display:block;color:var(--ink);font-size:1.1rem;margin-bottom:2px}
+ul{list-style:none;padding:0;margin:14px 0 0;display:grid;gap:8px}
+li{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:14px;padding:9px 12px;font-size:.93rem}
+li span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+li small{color:var(--mut)}
+li button{border:0;background:none;cursor:pointer;font-size:1rem;padding:2px 6px;border-radius:8px}
+li button:hover{background:var(--line)}
+.opt{margin-top:16px;display:grid;gap:6px}
+.opt label{font-weight:600;font-size:.95rem}
+.opt input,.opt select{border:1px solid var(--line);background:var(--bg);border-radius:12px;padding:11px 14px;width:100%}
+.go{margin-top:20px;width:100%;border:0;border-radius:16px;background:var(--acc);color:#fff;font-weight:700;font-size:1.05rem;padding:15px;cursor:pointer}
+.dark-go{color:#0E1424}
+.go:disabled{opacity:.45;cursor:not-allowed}
+.msg{margin-top:14px;font-size:.95rem;min-height:1.4em}
+.err{color:#D92D20}
+.res a{display:block;text-align:center;text-decoration:none;margin-top:12px;background:#12B76A;color:#fff;border-radius:16px;padding:15px;font-weight:700}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo"><i></i>PaperKit</div>
+    <div class="badge">100% private · works offline after load</div>
+  </header>
+
+  <section class="hero">
+    <h1>Every PDF job, finished in seconds.</h1>
+    <p>Merge, split, rotate, compress and convert. Your files are processed inside your browser and never uploaded.</p>
+  </section>
+
+  <main class="grid" id="grid" aria-label="PDF tools"></main>
+
+  <section class="trust">
+    <div><b>No uploads</b><span>Everything runs on your device, so private files stay private.</span></div>
+    <div><b>No sign-up</b><span>Pick a tool, add files, download the result.</span></div>
+    <div><b>No limits</b><span>Work with as many files as your device can handle.</span></div>
+  </section>
+
+  <footer>© <span id="yr"></span> PaperKit. Built with pdf-lib, PDF.js and JSZip.</footer>
+</div>
+
+<dialog id="dlg" aria-labelledby="dt">
+  <div class="dh">
+    <div><h2 id="dt"></h2><p id="dd"></p></div>
+    <button class="x" id="close" aria-label="Close">✕</button>
+  </div>
+  <div class="db">
+    <div class="drop" id="drop" tabindex="0" role="button">
+      <b>Choose files</b>or drag and drop them here
+    </div>
+    <input type="file" id="inp" hidden>
+    <ul id="list"></ul>
+    <div class="opt" id="opt"></div>
+    <button class="go" id="go" disabled>Process</button>
+    <div class="msg" id="msg" role="status"></div>
+    <div class="res" id="res"></div>
+  </div>
+</dialog>
+
+<script>
+const { PDFDocument, degrees } = PDFLib;
+pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+const TOOLS = [
+  { id:"merge", g:"⊕", n:"Merge PDF", d:"Combine several PDFs into one, in the order you choose.", c:"#FFB4A2", acc:".pdf", multi:true, min:2, out:"merged.pdf" },
+  { id:"split", g:"✂", n:"Split PDF", d:"Extract the pages you need, for example 1-3, 5, 8-10.", c:"#B8E0FF", acc:".pdf", opt:"range", out:"extracted.pdf" },
+  { id:"rotate", g:"↻", n:"Rotate PDF", d:"Turn every page clockwise or counter-clockwise.", c:"#C7F2C4", acc:".pdf", opt:"angle", out:"rotated.pdf" },
+  { id:"img2pdf", g:"▣", n:"Images to PDF", d:"Turn JPG, PNG or WebP images into one PDF.", c:"#FFE69A", acc:"image/*", multi:true, out:"images.pdf" },
+  { id:"pdf2jpg", g:"⇩", n:"PDF to JPG", d:"Save every page as a sharp JPG image.", c:"#E3C7FF", acc:".pdf", out:"pages.zip" },
+  { id:"compress", g:"⤓", n:"Compress PDF", d:"Shrink large PDFs. Pages become images, so text is no longer selectable.", c:"#FFC9E8", acc:".pdf", opt:"quality", out:"compressed.pdf" }
+];
+
+const $ = id => document.getElementById(id);
+let tool = null, files = [], url = null;
+
+$("yr").textContent = new Date().getFullYear();
+$("grid").innerHTML = TOOLS.map(t =>
+  `<button class="tile" style="--c:${t.c}" data-id="${t.id}"><span class="g">${t.g}</span><span><h3>${t.n}</h3><p>${t.d}</p></span></button>`).join("");
+$("grid").onclick = e => { const b = e.target.closest(".tile"); if (b) openTool(b.dataset.id); };
+$("close").onclick = () => $("dlg").close();
+
+function openTool(id) {
+  tool = TOOLS.find(t => t.id === id); files = [];
+  $("dt").textContent = tool.n; $("dd").textContent = tool.d;
+  $("inp").accept = tool.acc; $("inp").multiple = !!tool.multi;
+  const o = {
+    range: `<label for="o1">Pages to keep</label><input id="o1" placeholder="e.g. 1-3, 5, 8-10">`,
+    angle: `<label for="o1">Rotation</label><select id="o1"><option value="90">90° clockwise</option><option value="180">180°</option><option value="270">90° counter-clockwise</option></select>`,
+    quality: `<label for="o1">Compression level</label><select id="o1"><option value="0.6">Balanced</option><option value="0.4">Strong</option><option value="0.8">Light</option></select>`
+  };
+  $("opt").innerHTML = o[tool.opt] || "";
+  reset(); render(); $("dlg").showModal();
+}
+function reset() { $("msg").textContent = ""; $("msg").className = "msg"; $("res").innerHTML = ""; if (url) URL.revokeObjectURL(url); }
+
+const drop = $("drop");
+drop.onclick = () => $("inp").click();
+drop.onkeydown = e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); $("inp").click(); } };
+drop.ondragover = e => { e.preventDefault(); drop.classList.add("on"); };
+drop.ondragleave = () => drop.classList.remove("on");
+drop.ondrop = e => { e.preventDefault(); drop.classList.remove("on"); add([...e.dataTransfer.files]); };
+$("inp").onchange = e => { add([...e.target.files]); e.target.value = ""; };
+
+function add(list) {
+  const ok = list.filter(f => tool.id === "img2pdf" ? f.type.startsWith("image/") : /\.pdf$/i.test(f.name) || f.type === "application/pdf");
+  if (ok.length < list.length) say("Some files were skipped because they are not " + (tool.id === "img2pdf" ? "images." : "PDFs."), true);
+  files = tool.multi ? files.concat(ok) : ok.slice(0, 1);
+  reset(); render();
+}
+const size = b => b > 1048576 ? (b / 1048576).toFixed(1) + " MB" : Math.max(1, Math.round(b / 1024)) + " KB";
+function render() {
+  $("list").innerHTML = files.map((f, i) =>
+    `<li><span>${f.name.replace(/[<&]/g, "")}</span><small>${size(f.size)}</small>` +
+    (tool.multi && files.length > 1 ? `<button data-a="up" data-i="${i}" aria-label="Move up">↑</button>` : "") +
+    `<button data-a="rm" data-i="${i}" aria-label="Remove">✕</button></li>`).join("");
+  $("go").disabled = files.length < (tool.min || 1);
+  $("go").textContent = tool.n.replace(" PDF", "") + (tool.id === "merge" || tool.id === "img2pdf" ? " now" : " now");
+}
+$("list").onclick = e => {
+  const b = e.target.closest("button"); if (!b) return;
+  const i = +b.dataset.i;
+  if (b.dataset.a === "rm") files.splice(i, 1);
+  else if (i > 0) [files[i - 1], files[i]] = [files[i], files[i - 1]];
+  reset(); render();
+};
+function say(t, err) { $("msg").textContent = t; $("msg").className = "msg" + (err ? " err" : ""); }
+
+function ranges(str, max) {
+  const set = [];
+  str.split(",").forEach(p => {
+    const m = p.trim().match(/^(\d+)(?:\s*-\s*(\d+))?$/);
+    if (!m) throw new Error("Invalid page range: " + p.trim());
+    let a = +m[1], b = +(m[2] || m[1]);
+    if (a < 1 || b > max || a > b) throw new Error("Pages must be between 1 and " + max);
+    for (let i = a; i <= b; i++) set.push(i - 1);
+  });
+  if (!set.length) throw new Error("Enter the pages you want to keep");
+  return set;
+}
+const buf = f => f.arrayBuffer();
+const toBlob = (c, q) => new Promise(r => c.toBlob(r, "image/jpeg", q));
+async function renderPages(file, scale, cb) {
+  const pdf = await pdfjsLib.getDocument({ data: await buf(file) }).promise;
+  for (let n = 1; n <= pdf.numPages; n++) {
+    say(`Processing page ${n} of ${pdf.numPages}…`);
+    const pg = await pdf.getPage(n), vp = pg.getViewport({ scale });
+    const c = document.createElement("canvas"); c.width = vp.width; c.height = vp.height;
+    await pg.render({ canvasContext: c.getContext("2d"), viewport: vp }).promise;
+    await cb(c, n, pg.getViewport({ scale: 1 }));
+  }
+}
+
+const RUN = {
+  async merge() {
+    const out = await PDFDocument.create();
+    for (const f of files) {
+      const d = await PDFDocument.load(await buf(f));
+      (await out.copyPages(d, d.getPageIndices())).forEach(p => out.addPage(p));
+    }
+    return new Blob([await out.save()], { type: "application/pdf" });
+  },
+  async split() {
+    const src = await PDFDocument.load(await buf(files[0])), out = await PDFDocument.create();
+    const idx = ranges($("o1").value, src.getPageCount());
+    (await out.copyPages(src, idx)).forEach(p => out.addPage(p));
+    return new Blob([await out.save()], { type: "application/pdf" });
+  },
+  async rotate() {
+    const d = await PDFDocument.load(await buf(files[0])), a = +$("o1").value;
+    d.getPages().forEach(p => p.setRotation(degrees((p.getRotation().angle + a) % 360)));
+    return new Blob([await d.save()], { type: "application/pdf" });
+  },
+  async img2pdf() {
+    const out = await PDFDocument.create();
+    for (const f of files) {
+      say("Adding " + f.name + "…");
+      let img;
+      if (f.type === "image/jpeg") img = await out.embedJpg(await buf(f));
+      else if (f.type === "image/png") img = await out.embedPng(await buf(f));
+      else {
+        const bm = await createImageBitmap(f), c = document.createElement("canvas");
+        c.width = bm.width; c.height = bm.height; c.getContext("2d").drawImage(bm, 0, 0);
+        img = await out.embedJpg(await (await toBlob(c, .92)).arrayBuffer());
+      }
+      out.addPage([img.width, img.height]).drawImage(img, { x: 0, y: 0, width: img.width, height: img.height });
+    }
+    return new Blob([await out.save()], { type: "application/pdf" });
+  },
+  async pdf2jpg() {
+    const zip = new JSZip(), base = files[0].name.replace(/\.pdf$/i, "");
+    await renderPages(files[0], 2, async (c, n) => zip.file(`${base}-page-${n}.jpg`, await toBlob(c, .92)));
+    say("Packing images…");
+    return zip.generateAsync({ type: "blob" });
+  },
+  async compress() {
+    const out = await PDFDocument.create(), q = +$("o1").value;
+    await renderPages(files[0], 1.5, async (c, n, vp1) => {
+      const img = await out.embedJpg(await (await toBlob(c, q)).arrayBuffer());
+      out.addPage([vp1.width, vp1.height]).drawImage(img, { x: 0, y: 0, width: vp1.width, height: vp1.height });
+    });
+    return new Blob([await out.save()], { type: "application/pdf" });
+  }
+};
+
+$("go").onclick = async () => {
+  reset(); $("go").disabled = true; say("Working…");
+  try {
+    const blob = await RUN[tool.id]();
+    url = URL.createObjectURL(blob);
+    const before = files.reduce((s, f) => s + f.size, 0);
+    say(`Done. ${size(before)} → ${size(blob.size)}`);
+    $("res").innerHTML = `<a href="${url}" download="${tool.out}">Download ${tool.out}</a>`;
+  } catch (e) {
+    say(e.message && !/Failed to parse|encrypted/i.test(e.message) ? e.message : "This file could not be read. It may be damaged or password-protected.", true);
+  }
+  $("go").disabled = files.length < (tool.min || 1);
+};
+</script>
+</body>
+</html>
