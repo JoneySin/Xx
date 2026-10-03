@@ -132,6 +132,10 @@ header{flex-wrap:nowrap}
 .hero>div:first-child>h1{background-image:linear-gradient(100deg,var(--ink) 42%,color-mix(in srgb,var(--acc) 65%,var(--ink)) 50%,var(--ink) 58%);background-size:300% 100%}
 :root[data-theme=dark] .bg i:nth-child(2){background:#6D5BFF}
 @media(prefers-color-scheme:dark){:root:not([data-theme=light]) .bg i:nth-child(2){background:#6D5BFF}}
+li{padding:8px 12px 8px 8px}
+.th{height:68px;max-width:84px;border-radius:10px;flex:none;background:var(--line);border:1px solid var(--line)}
+img.th{width:68px;object-fit:cover}
+canvas.th{background:#fff}
 @keyframes shine{to{background-position:-300% 0}}
 @keyframes bob{50%{transform:translateY(-6px)}}
 @keyframes mq{to{transform:translateX(-50%)}}
@@ -206,8 +210,9 @@ const TOOLS = [
   { id:"pdf2jpg", g:"⇩", n:"PDF to Image", d:"Save every page as a sharp JPG or PNG image.", c:"#E3C7FF", acc:".pdf", opt:"p2i", out:"pages.zip" },
   { id:"watermark", g:"✎", n:"Watermark PDF", d:"Stamp diagonal text across every page.", c:"#FFD3A5", acc:".pdf", opt:"wm", out:"watermarked.pdf" },
   { id:"pagenum", g:"#", n:"Page Numbers", d:"Add page numbers to every page.", c:"#A8E6E0", acc:".pdf", opt:"pn", out:"numbered.pdf" },
-  { id:"unlock", g:"⚿", n:"Unlock PDF", d:"Remove a password you know. Pages are rebuilt as images, so text is no longer selectable.", c:"#C9CCFF", acc:".pdf", opt:"pw", out:"unlocked.pdf" },
+  { id:"unlock", g:"⚿", n:"Unlock PDF", d:"Remove a password you know. Text stays selectable when possible.", c:"#C9CCFF", acc:".pdf", opt:"pw", out:"unlocked.pdf" },
   { id:"pdf2txt", g:"¶", n:"PDF to Text", d:"Extract all text from a PDF into a .txt file.", c:"#F3C9B8", acc:".pdf", out:"text.txt" },
+  { id:"protect", n:"Protect PDF", d:"Lock a PDF with a password. Needs an internet connection the first time.", c:"#FFD0D0", acc:".pdf", opt:"prot", out:"protected.pdf" },
   { id:"splitall", n:"Split to Pages", d:"Save every page as its own PDF, bundled in one ZIP.", c:"#C2E9FB", acc:".pdf", out:"pages.zip" },
   { id:"croppdf", n:"Crop PDF", d:"Trim margins from every page.", c:"#F9DDA4", acc:".pdf", opt:"crop", out:"cropped.pdf" },
   { id:"pdfinfo", n:"Edit PDF Info", d:"Set title, author and subject, or leave blank to clear them.", c:"#D8D0FF", acc:".pdf", opt:"info", out:"edited.pdf" },
@@ -236,6 +241,7 @@ const P = {
 P.splitall = '<rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/>';
 P.croppdf = '<path d="M6 2v14a2 2 0 0 0 2 2h14M2 6h14a2 2 0 0 1 2 2v14"/>';
 P.pdfinfo = '<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/>';
+P.protect = '<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4M12 15v2"/>';
 P.reverse = '<path d="M7 4v16M3 16l4 4 4-4M17 20V4M13 8l4-4 4 4"/>';
 P.gray = '<circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/>';
 P.a4 = '<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/>';
@@ -262,6 +268,7 @@ const OPTS = () => ({
   iwm: fld("o1", "Watermark text", "© YourX") + sel("o2", "Strength", [[.45, "Light"], [.7, "Medium"], [1, "Strong"]]) + sel("o3", "Position", [["c", "Diagonal, centre"], ["r", "Bottom right"]]),
   join: sel("o1", "Direction", [["v", "Top to bottom"], ["h", "Side by side"]]) + fld("o2", "Gap between images in px", "0", "number"),
   ps: fld("o1", "Photo width in cm", "3.5", "number") + fld("o2", "Photo height in cm", "4.5", "number") + fld("o3", "Gap in mm", "2", "number"),
+  prot: fld("o1", "Password to open the PDF", "", "password") + fld("o2", "Owner password for editing (optional)", "", "password") + sel("o3", "Printing", [["1", "Allowed"], ["0", "Not allowed"]]),
   pw: fld("o1", b("PDF password", "PDF पासवर्ड"), "", "password")
 });
 let outName = "";
@@ -298,13 +305,26 @@ function add(list) {
   files = tool.multi ? files.concat(ok) : ok.slice(0, 1);
   reset(); render();
 }
+const urls = new WeakMap(), urlOf = f => { if (!urls.has(f)) urls.set(f, URL.createObjectURL(f)); return urls.get(f); };
+const thumb = f => f.type.startsWith("image/") ? `<img class="th" src="${urlOf(f)}" alt="Preview of ${f.name.replace(/[<&"]/g, "")}">` : `<canvas class="th" data-n="${files.indexOf(f)}"></canvas>`;
+async function thumbs() {
+  for (const c of document.querySelectorAll("canvas.th")) {
+    try {
+      const pdf = await pdfjsLib.getDocument({ data: await buf(files[c.dataset.n]) }).promise, pg = await pdf.getPage(1);
+      const vp = pg.getViewport({ scale: 1 }), v2 = pg.getViewport({ scale: 140 / vp.height });
+      c.width = v2.width; c.height = v2.height;
+      await pg.render({ canvasContext: c.getContext("2d"), viewport: v2 }).promise;
+    } catch (e) { c.remove(); }
+  }
+}
 const size = b => b > 1048576 ? (b / 1048576).toFixed(1) + " MB" : Math.max(1, Math.round(b / 1024)) + " KB";
 function render() {
   $("list").innerHTML = files.map((f, i) =>
-    `<li><span>${f.name.replace(/[<&]/g, "")}</span><small>${size(f.size)}</small>` +
+    `<li>${thumb(f)}<span>${f.name.replace(/[<&]/g, "")}</span><small>${size(f.size)}</small>` +
     (tool.multi && files.length > 1 ? `<button data-a="up" data-i="${i}" aria-label="Move up">↑</button>` : "") +
     `<button data-a="rm" data-i="${i}" aria-label="Remove">✕</button></li>`).join("");
   $("go").disabled = files.length < (tool.min || 1);
+  thumbs();
   $("go").textContent = b(nm(tool).replace(/ PDF| &.*/, "") + " now", "शुरू करें");
 }
 $("list").onclick = e => {
@@ -329,6 +349,7 @@ function ranges(str, max) {
   return set;
 }
 const buf = f => f.arrayBuffer();
+const esm = async u => { try { const m = await import(u); return m.PDFDocument ? m : m.default; } catch (e) { throw new Error("Could not load the password module. Check your internet connection and try again."); } };
 const toBlob = (c, q, m = "image/jpeg") => new Promise(r => c.toBlob(r, m, q));
 async function renderPages(file, scale, cb, pw) {
   const pdf = await pdfjsLib.getDocument({ data: await buf(file), password: pw }).promise;
@@ -399,7 +420,20 @@ const RUN = {
     for (let i = 0; i < 6; i++) { say(b("Fitting to size…", "साइज़ में फिट कर रहे हैं…")); const q = (lo + hi) / 2, r = await build(q); if (r.size <= max) { best = r; lo = q; } else hi = q; }
     return best || build(.05);
   },
+  async protect() {
+    const up = $("o1").value, op = $("o2").value || up + "-owner";
+    if (!up) throw new Error("Enter a password.");
+    const L = await esm("https://cdn.jsdelivr.net/npm/pdf-lib-plus-encrypt@1.1.0/+esm");
+    const d = await L.PDFDocument.load(await buf(files[0]));
+    await d.encrypt({ userPassword: up, ownerPassword: op, permissions: { printing: $("o3").value === "1" ? "highResolution" : false, modifying: false, copying: false, annotating: false, fillingForms: true, contentAccessibility: true, documentAssembly: false } });
+    return new Blob([await d.save()], { type: "application/pdf" });
+  },
   async unlock() {
+    try {
+      const L = await esm("https://cdn.jsdelivr.net/npm/@cantoo/pdf-lib/+esm");
+      const d = await L.PDFDocument.load(await buf(files[0]), { password: $("o1").value });
+      return new Blob([await d.save()], { type: "application/pdf" });
+    } catch (e) { /* fall back to rebuilding pages as images */ }
     const out = await PDFDocument.create();
     await renderPages(files[0], 2, async (c, n, vp) => {
       const img = await out.embedJpg(await (await toBlob(c, .92)).arrayBuffer());
@@ -579,7 +613,7 @@ $("go").onclick = async () => {
 };
 $("drop").innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></svg><b>Choose files</b>or drag and drop them here';
 $("q").oninput = renderGrid;
-const CHIPS = [["Merge PDF","merge"],["PDF to JPG","pdf2jpg"],["Compress","compress"],["Crop image","imgstudio"],["Split","split"],["PNG / WebP","imgstudio"],["Watermark","watermark"],["DPI changer","imgstudio"],["Unlock","unlock"],["PDF to text","pdf2txt"],["Split to ZIP","splitall"],["Page numbers","pagenum"],["Rotate","rotate"],["Crop PDF","croppdf"],["Resize image","imgstudio"],["PDF info","pdfinfo"],["Reverse pages","reverse"],["Passport photo sheet","photosheet"],["Join images","join"],["Watermark image","imgwm"],["Grayscale PDF","gray"],["A4 resize","a4"],["Image to Base64","base64"]];
+const CHIPS = [["Merge PDF","merge"],["PDF to JPG","pdf2jpg"],["Compress","compress"],["Crop image","imgstudio"],["Split","split"],["PNG / WebP","imgstudio"],["Watermark","watermark"],["DPI changer","imgstudio"],["Unlock","unlock"],["PDF to text","pdf2txt"],["Split to ZIP","splitall"],["Page numbers","pagenum"],["Rotate","rotate"],["Crop PDF","croppdf"],["Resize image","imgstudio"],["PDF info","pdfinfo"],["Protect PDF","protect"],["Reverse pages","reverse"],["Passport photo sheet","photosheet"],["Join images","join"],["Watermark image","imgwm"],["Grayscale PDF","gray"],["A4 resize","a4"],["Image to Base64","base64"]];
 const chipHtml = CHIPS.map(c => `<button class="chip" data-id="${c[1]}">${c[0]}</button>`).join("");
 $("mq").innerHTML = chipHtml + chipHtml;
 $("mq").onclick = e => { const c = e.target.closest(".chip"); if (c) openTool(c.dataset.id); };
