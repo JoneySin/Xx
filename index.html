@@ -465,7 +465,11 @@ const RUN = {
     const m = $("o1").value, L = PDFLib;
     if (m !== "ras" && L.BlendMode) {
       const d = await PDFDocument.load(await buf(files[0])), v = m === "soft" ? .92 : 1;
-      d.getPages().forEach(p => p.drawRectangle({ x: -1e4, y: -1e4, width: 2e4, height: 2e4, color: L.rgb(v, v, v), blendMode: L.BlendMode.Difference }));
+      d.getPages().forEach(p => {
+        p.drawRectangle({ x: -1e4, y: -1e4, width: 2e4, height: 2e4, color: L.rgb(v, v, v), blendMode: L.BlendMode.Difference });
+        const bg = d.context.register(d.context.stream("q 1 g -10000 -10000 20000 20000 re f Q"));
+        p.node.Contents().insert(0, bg);
+      });
       return new Blob([await d.save()], { type: "application/pdf" });
     }
     const out = await PDFDocument.create();
